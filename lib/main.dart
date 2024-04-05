@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/screens/index.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }
 
@@ -11,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'We Share',
         debugShowCheckedModeBanner: false,
-        initialRoute: "/",
+        initialRoute: "/login",
         routes: appRoutes);
   }
 }

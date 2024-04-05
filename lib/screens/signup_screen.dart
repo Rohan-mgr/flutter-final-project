@@ -1,50 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:form_validator/form_validator.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _LoginState extends State<Login> {
+class _SignUpState extends State<SignUp> {
   bool _showPassword = false;
+  String _username = '';
+  String _email = '';
+  String _password = '';
 
-  final _formKey = GlobalKey<FormState>();
   final FirebaseAuthService _authService = FirebaseAuthService();
 
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  void signInHandler() async {
+  void signUpHandler() async {
     if (_formKey.currentState!.validate()) {
-      final user = await _authService.signInWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
+      final user = await _authService.createUserWithEmailAndPassword(
+        _email,
+        _password,
       );
       if (user != null) {
-        print('User signed in successfully');
-        Navigator.pushNamed(context, "/");
+        print('User created successfully');
+        Navigator.pushNamed(context, "/login");
+        Toastify(
+            context: context,
+            msg: "User Registered Successfully",
+            status: ToastStatus.success);
       } else {
-        print('User sign in failed');
+        print('User creation failed');
       }
     }
   }
 
+  RegExp passwordRgx = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$#!%*?&])[A-Za-z\d@$#!%*?&]{8,}$');
+
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("We Share"),
+        title: Text("Sign Up"),
       ),
       body: Form(
         key: _formKey,
@@ -61,12 +62,34 @@ class _LoginState extends State<Login> {
               ),
               const SizedBox(height: 10.0),
               Text(
-                "Sign In",
+                "Sign Up",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               const SizedBox(height: 20.0),
               TextFormField(
-                controller: emailController,
+                onChanged: (value) => {
+                  setState(
+                    () => _username = value,
+                  )
+                },
+                validator: ValidationBuilder()
+                    .required("Please enter your username")
+                    .minLength(2)
+                    .maxLength(50)
+                    .build(),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'UserName*',
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                onChanged: (value) => {
+                  setState(
+                    () => _email = value,
+                  )
+                },
                 validator: ValidationBuilder().email().maxLength(50).build(),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
@@ -76,9 +99,16 @@ class _LoginState extends State<Login> {
               ),
               const SizedBox(height: 10.0),
               TextFormField(
-                controller: passwordController,
-                validator:
-                    ValidationBuilder().minLength(5).maxLength(50).build(),
+                onChanged: (value) => {
+                  setState(
+                    () => _password = value,
+                  )
+                },
+                validator: ValidationBuilder()
+                    .regExp(passwordRgx, "Please enter strong password")
+                    .minLength(5)
+                    .maxLength(50)
+                    .build(),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Password*',
@@ -113,20 +143,20 @@ class _LoginState extends State<Login> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                onPressed: signInHandler,
-                child: Text('Sign In'),
+                onPressed: signUpHandler,
+                child: Text('Sign Up'),
               ),
               const SizedBox(height: 10.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an account?"),
+                  Text("Already have an account?"),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, "/signup");
+                      Navigator.pushNamed(context, "/login");
                     },
                     child: Text(
-                      'Sign Up',
+                      'Sign In',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
