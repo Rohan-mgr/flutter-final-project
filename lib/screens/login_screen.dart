@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:form_validator/form_validator.dart';
 
 class Login extends StatefulWidget {
@@ -11,6 +14,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool _showPassword = false;
+  String _errMsg = "";
+  bool _isSubmitting = false;
 
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuthService _authService = FirebaseAuthService();
@@ -27,15 +32,29 @@ class _LoginState extends State<Login> {
 
   void signInHandler() async {
     if (_formKey.currentState!.validate()) {
-      final user = await _authService.signInWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-      );
-      if (user != null) {
-        print('User signed in successfully');
+      try {
+        setState(() {
+          _isSubmitting = true;
+        });
+        User? user = await _authService.signInWithEmailAndPassword(
+            emailController.text, passwordController.text);
+        if (user == null) {
+          throw "User not found";
+        }
+        print("User signed in successfully");
+        setState(() {
+          _isSubmitting = false;
+        });
         Navigator.pushNamed(context, "/");
-      } else {
-        print('User sign in failed');
+      } catch (error) {
+        print(error);
+        setState(() {
+          _errMsg = error.toString();
+          _isSubmitting = false;
+        });
+        emailController.clear();
+        passwordController.clear();
+        return null;
       }
     }
   }
@@ -53,7 +72,6 @@ class _LoginState extends State<Login> {
           child: Column(
             mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
             children: [
-              // App logo (optional)
               Image.asset(
                 'logo.png',
                 height: 100.0,
@@ -65,6 +83,8 @@ class _LoginState extends State<Login> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               const SizedBox(height: 20.0),
+              if (_errMsg.isNotEmpty)
+                Alert(context, _errMsg, ToastStatus.error),
               TextFormField(
                 controller: emailController,
                 validator: ValidationBuilder().email().maxLength(50).build(),
@@ -114,7 +134,7 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 onPressed: signInHandler,
-                child: Text('Sign In'),
+                child: _isSubmitting ? Loader() : Text('Sign In'),
               ),
               const SizedBox(height: 10.0),
               Row(
