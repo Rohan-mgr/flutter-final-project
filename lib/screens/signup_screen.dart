@@ -17,12 +17,21 @@ class _SignUpState extends State<SignUp> {
   String _errMsg = "";
   bool _isSubmitting = false;
 
-  String _firstName = '';
-  String _lastName = '';
-  String _email = '';
-  String _password = '';
-
   final FirebaseAuthService _authService = FirebaseAuthService();
+
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   void signUpHandler() async {
     if (_formKey.currentState!.validate()) {
@@ -31,19 +40,24 @@ class _SignUpState extends State<SignUp> {
           _isSubmitting = true;
         });
         await _authService.createUserWithEmailAndPassword(
-          _firstName,
-          _lastName,
-          _email,
-          _password,
+          firstNameController.text,
+          lastNameController.text,
+          emailController.text,
+          passwordController.text,
         );
         print('User created successfully');
         setState(() {
           _isSubmitting = false;
+          _errMsg = "";
         });
         Toastify(
             context: context,
             msg: "User Registered Successfully",
             status: ToastStatus.success);
+        firstNameController.clear();
+        lastNameController.clear();
+        emailController.clear();
+        passwordController.clear();
         Navigator.pushNamed(context, "/login");
       } catch (error) {
         print(error);
@@ -51,6 +65,10 @@ class _SignUpState extends State<SignUp> {
           _errMsg = error.toString();
           _isSubmitting = false;
         });
+        firstNameController.clear();
+        lastNameController.clear();
+        emailController.clear();
+        passwordController.clear();
         return null;
       }
     }
@@ -88,11 +106,7 @@ class _SignUpState extends State<SignUp> {
               if (_errMsg.isNotEmpty)
                 Alert(context, _errMsg, ToastStatus.error),
               TextFormField(
-                onChanged: (value) => {
-                  setState(
-                    () => _firstName = value,
-                  )
-                },
+                controller: firstNameController,
                 validator:
                     ValidationBuilder().minLength(2).maxLength(50).build(),
                 decoration: InputDecoration(
@@ -103,11 +117,7 @@ class _SignUpState extends State<SignUp> {
               ),
               const SizedBox(height: 10.0),
               TextFormField(
-                onChanged: (value) => {
-                  setState(
-                    () => _lastName = value,
-                  )
-                },
+                controller: lastNameController,
                 validator:
                     ValidationBuilder().minLength(2).maxLength(50).build(),
                 decoration: InputDecoration(
@@ -118,11 +128,7 @@ class _SignUpState extends State<SignUp> {
               ),
               const SizedBox(height: 10.0),
               TextFormField(
-                onChanged: (value) => {
-                  setState(
-                    () => _email = value,
-                  )
-                },
+                controller: emailController,
                 validator: ValidationBuilder().email().maxLength(50).build(),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
@@ -132,11 +138,7 @@ class _SignUpState extends State<SignUp> {
               ),
               const SizedBox(height: 10.0),
               TextFormField(
-                onChanged: (value) => {
-                  setState(
-                    () => _password = value,
-                  )
-                },
+                controller: passwordController,
                 validator: ValidationBuilder()
                     .regExp(passwordRgx, "Please enter strong password")
                     .minLength(5)

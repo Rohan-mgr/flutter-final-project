@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
+import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
@@ -44,7 +45,11 @@ class _LoginState extends State<Login> {
         print("User signed in successfully");
         setState(() {
           _isSubmitting = false;
+          _errMsg = "";
         });
+        await Storage.setUser("user", user);
+        emailController.clear();
+        passwordController.clear();
         Navigator.pushNamed(context, "/");
       } catch (error) {
         print(error);

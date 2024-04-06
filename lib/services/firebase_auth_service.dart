@@ -8,9 +8,19 @@ class FirebaseAuthService {
 
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  createUserWithEmailAndPassword(
+  Future<void> createUserWithEmailAndPassword(
       String firstName, String lastName, String email, String password) async {
     try {
+      // Check if the email already exists
+      final emailExists = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (emailExists.docs.isNotEmpty) {
+        throw "Email address already exists";
+      }
+
       String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
       final user = <String, dynamic>{
         'firstName': firstName,
@@ -23,7 +33,7 @@ class FirebaseAuthService {
       print('User created successfully, ${doc.id}');
     } catch (e) {
       print(e);
-      return null;
+      throw e;
     }
   }
 
