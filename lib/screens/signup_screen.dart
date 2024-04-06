@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:form_validator/form_validator.dart';
 
 class SignUp extends StatefulWidget {
@@ -12,7 +14,11 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   bool _showPassword = false;
-  String _username = '';
+  String _errMsg = "";
+  bool _isSubmitting = false;
+
+  String _firstName = '';
+  String _lastName = '';
   String _email = '';
   String _password = '';
 
@@ -20,19 +26,32 @@ class _SignUpState extends State<SignUp> {
 
   void signUpHandler() async {
     if (_formKey.currentState!.validate()) {
-      final user = await _authService.createUserWithEmailAndPassword(
-        _email,
-        _password,
-      );
-      if (user != null) {
+      try {
+        setState(() {
+          _isSubmitting = true;
+        });
+        await _authService.createUserWithEmailAndPassword(
+          _firstName,
+          _lastName,
+          _email,
+          _password,
+        );
         print('User created successfully');
-        Navigator.pushNamed(context, "/login");
+        setState(() {
+          _isSubmitting = false;
+        });
         Toastify(
             context: context,
             msg: "User Registered Successfully",
             status: ToastStatus.success);
-      } else {
-        print('User creation failed');
+        Navigator.pushNamed(context, "/login");
+      } catch (error) {
+        print(error);
+        setState(() {
+          _errMsg = error.toString();
+          _isSubmitting = false;
+        });
+        return null;
       }
     }
   }
@@ -66,20 +85,34 @@ class _SignUpState extends State<SignUp> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               const SizedBox(height: 20.0),
+              if (_errMsg.isNotEmpty)
+                Alert(context, _errMsg, ToastStatus.error),
               TextFormField(
                 onChanged: (value) => {
                   setState(
-                    () => _username = value,
+                    () => _firstName = value,
                   )
                 },
-                validator: ValidationBuilder()
-                    .required("Please enter your username")
-                    .minLength(2)
-                    .maxLength(50)
-                    .build(),
+                validator:
+                    ValidationBuilder().minLength(2).maxLength(50).build(),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'UserName*',
+                  labelText: 'First Name*',
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 10.0),
+              TextFormField(
+                onChanged: (value) => {
+                  setState(
+                    () => _lastName = value,
+                  )
+                },
+                validator:
+                    ValidationBuilder().minLength(2).maxLength(50).build(),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Last Name*',
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -144,7 +177,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
                 onPressed: signUpHandler,
-                child: Text('Sign Up'),
+                child: _isSubmitting ? Loader() : Text('Sign Up'),
               ),
               const SizedBox(height: 10.0),
               Row(

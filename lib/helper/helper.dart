@@ -1,5 +1,6 @@
 import 'package:toastification/toastification.dart';
 import 'package:flutter/material.dart';
+import 'package:bootstrap_alert/bootstrap_alert.dart';
 
 enum ToastStatus { success, error }
 
@@ -36,5 +37,18 @@ void Toastify({BuildContext? context, String? msg, ToastStatus? status}) {
     pauseOnHover: true,
     dragToClose: true,
     applyBlurEffect: true,
+  );
+}
+
+BootstrapAlert Alert(BuildContext context, String errMsg, ToastStatus status) {
+  return BootstrapAlert(
+    visible: true,
+    status: status == ToastStatus.success
+        ? AlertStatus.success
+        : AlertStatus.danger,
+    leadingIcon:
+        status == ToastStatus.success ? AlertIcons.success : AlertIcons.warning,
+    isDismissible: true,
+    text: errMsg,
   );
 }
