@@ -46,7 +46,7 @@ class _HomeState extends State<Home> {
             child: ElevatedButton(
                 onPressed: () async {
                   await Storage.remove('user');
-                  Navigator.popAndPushNamed(context, "/login");
+                  Navigator.popAndPushNamed(context, "/");
                 },
                 child: Text("Logout")),
           ),
