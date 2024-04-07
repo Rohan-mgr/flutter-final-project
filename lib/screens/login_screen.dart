@@ -50,7 +50,7 @@ class _LoginState extends State<Login> {
         await Storage.setUser("user", user);
         emailController.clear();
         passwordController.clear();
-        Navigator.pushNamed(context, "/");
+        Navigator.popAndPushNamed(context, "/");
       } catch (error) {
         print(error);
         setState(() {
@@ -78,7 +78,7 @@ class _LoginState extends State<Login> {
             mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
             children: [
               Image.asset(
-                'logo.png',
+                'assets/logo.png',
                 height: 100.0,
                 width: 100.0,
               ),
@@ -148,7 +148,7 @@ class _LoginState extends State<Login> {
                   Text("Don't have an account?"),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, "/signup");
+                      Navigator.popAndPushNamed(context, "/signup");
                     },
                     child: Text(
                       'Sign Up',

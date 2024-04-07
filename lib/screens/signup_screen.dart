@@ -58,7 +58,7 @@ class _SignUpState extends State<SignUp> {
         lastNameController.clear();
         emailController.clear();
         passwordController.clear();
-        Navigator.pushNamed(context, "/login");
+        Navigator.popAndPushNamed(context, "/login");
       } catch (error) {
         print(error);
         setState(() {
@@ -93,7 +93,7 @@ class _SignUpState extends State<SignUp> {
             children: [
               // App logo (optional)
               Image.asset(
-                'logo.png',
+                'assets/logo.png',
                 height: 100.0,
                 width: 100.0,
               ),
@@ -188,7 +188,7 @@ class _SignUpState extends State<SignUp> {
                   Text("Already have an account?"),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, "/login");
+                      Navigator.popAndPushNamed(context, "/login");
                     },
                     child: Text(
                       'Sign In',
