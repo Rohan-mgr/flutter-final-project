@@ -83,9 +83,11 @@ class _LoginState extends State<Login> {
                 width: 100.0,
               ),
               const SizedBox(height: 10.0),
-              Text(
-                "Sign In",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              Center(
+                child: Text(
+                  "Sign In",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
               ),
               const SizedBox(height: 20.0),
               if (_errMsg.isNotEmpty)
@@ -133,6 +135,8 @@ class _LoginState extends State<Login> {
               const SizedBox(height: 10.0),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
