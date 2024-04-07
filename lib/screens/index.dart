@@ -7,7 +7,7 @@ import 'package:flutter_final_project/screens/signup_screen.dart';
 
 // Define the routes as a Map
 Map<String, Widget Function(BuildContext)> get appRoutes => {
-      '/': (context) => Home(),
-      '/login': (context) => Login(),
+      '/home': (context) => Home(),
+      '/': (context) => Login(),
       "/signup": (context) => SignUp(),
     };

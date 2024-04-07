@@ -50,7 +50,7 @@ class _LoginState extends State<Login> {
         await Storage.setUser("user", user);
         emailController.clear();
         passwordController.clear();
-        Navigator.popAndPushNamed(context, "/");
+        Navigator.popAndPushNamed(context, "/home");
       } catch (error) {
         print(error);
         setState(() {
@@ -74,8 +74,8 @@ class _LoginState extends State<Login> {
         key: _formKey,
         child: Container(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
+          child: ListView(
+            // mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
             children: [
               Image.asset(
                 'assets/logo.png',

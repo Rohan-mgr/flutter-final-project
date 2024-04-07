@@ -88,8 +88,8 @@ class _SignUpState extends State<SignUp> {
         key: _formKey,
         child: Container(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
+          child: ListView(
+            // mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
             children: [
               // App logo (optional)
               Image.asset(
