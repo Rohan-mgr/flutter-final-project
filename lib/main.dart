@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'We Share',
         debugShowCheckedModeBanner: false,
-        initialRoute: "/login",
+        initialRoute: "/",
         routes: appRoutes);
   }
 }
