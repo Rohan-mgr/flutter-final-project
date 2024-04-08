@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:form_validator/form_validator.dart';
@@ -14,7 +15,7 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-  String error = "";
+  String _error = "";
   bool _isSubmitting = false;
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
@@ -22,14 +23,27 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   void sendMailHandler() async {
     if (_formKey.currentState!.validate()) {
+      var email = emailController.text;
       try {
         setState(() {
           _isSubmitting = true;
+          _error = "";
         });
-        var response =
-            await _authService.userExists(email: emailController.text);
-        print(response);
-      } catch (error) {}
+        var username = await _authService.userExists(email: email);
+        print(email + " " + username);
+        bool mailSent =
+            await sendMail(recipientEmail: email, recipientName: username);
+        if (!mailSent) {
+          throw "Error sending mail";
+        }
+        Navigator.popAndPushNamed(context, "/");
+        //redirect garni kaam
+      } catch (error) {
+        setState(() {
+          _isSubmitting = false;
+          _error = error.toString();
+        });
+      }
     }
   }
 
@@ -59,6 +73,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               SizedBox(
                 height: 20,
               ),
+              _error.isNotEmpty
+                  ? Alert(context, _error, ToastStatus.error)
+                  : Text(""),
               TextFormField(
                 controller: emailController,
                 validator: ValidationBuilder().email().maxLength(50).build(),
