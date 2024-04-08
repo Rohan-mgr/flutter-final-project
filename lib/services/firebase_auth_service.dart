@@ -65,6 +65,20 @@ class FirebaseAuthService {
     }
   }
 
+  Future<String> userExists({required String email}) async {
+    final emailExists = await FirebaseFirestore.instance
+        .collection("users")
+        .where("email", isEqualTo: email)
+        .get();
+
+    if (emailExists.docs.isEmpty) {
+      throw "Email address does not exist";
+    }
+    print(emailExists);
+
+    return email;
+  }
+
   // for signing out
   // Future<void> signOut() async {
   //   await _firebaseAuth.signOut();
