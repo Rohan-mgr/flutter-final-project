@@ -1,6 +1,16 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter/material.dart';
 import 'package:bootstrap_alert/bootstrap_alert.dart';
+import 'package:otp/otp.dart';
+
+String generateOTP() {
+  String secret = dotenv.env['OTP_SECRET']!;
+  final otp = OTP.generateTOTPCodeString(
+      secret, DateTime.now().millisecondsSinceEpoch,
+      interval: 20, algorithm: Algorithm.SHA512);
+  return otp;
+}
 
 enum ToastStatus { success, error }
 
@@ -32,7 +42,7 @@ void Toastify({BuildContext? context, String? msg, ToastStatus? status}) {
       )
     ],
     showProgressBar: true,
-    closeButtonShowType: CloseButtonShowType.onHover,
+    closeButtonShowType: CloseButtonShowType.always,
     closeOnClick: true,
     pauseOnHover: true,
     dragToClose: true,
