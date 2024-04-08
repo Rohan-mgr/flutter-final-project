@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/helper.dart';
+import 'package:flutter_final_project/services/mailer.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/types/user.dart';
 
@@ -41,6 +43,15 @@ class _HomeState extends State<Home> {
         children: [
           Center(
             child: Text("Welcome, ${user?.firstName} ${user?.lastName}"),
+          ),
+          Center(
+            child: ElevatedButton(
+                onPressed: () async {
+                  sendMail(
+                      recipientEmail: user?.email,
+                      recipientName: user?.firstName);
+                },
+                child: Text("Send OTP")),
           ),
           Center(
             child: ElevatedButton(
