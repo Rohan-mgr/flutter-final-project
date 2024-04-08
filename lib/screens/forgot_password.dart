@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
-import 'package:flutter_final_project/types/user.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:flutter_final_project/services/mailer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -36,6 +34,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         if (!mailSent) {
           throw "Error sending mail";
         }
+        Toastify(
+            context: context,
+            msg: "OTP sent successfully",
+            status: ToastStatus.success);
         Navigator.popAndPushNamed(context, "/");
         //redirect garni kaam
       } catch (error) {
