@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/helper/helper.dart';
-import 'package:flutter_final_project/services/mailer.dart';
-import 'package:flutter_final_project/helper/storage.dart';
-import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/screens/blogs_screen.dart';
+import 'package:flutter_final_project/screens/notes_screen.dart';
+import 'package:flutter_final_project/screens/questions_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,25 +11,14 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  User? user;
+  int _currentPageIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    loadUserFromLocalStorage();
-  }
+  List<Widget> _widgetOptions = <Widget>[Notes(), Questions(), Blogs()];
 
-  Future<void> loadUserFromLocalStorage() async {
-    try {
-      final loggedUser = await Storage.getUser("user");
-      if (loggedUser != null) {
-        setState(() {
-          user = loggedUser;
-        });
-      }
-    } catch (error) {
-      print('Error retrieving user: $error');
-    }
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentPageIndex = index;
+    });
   }
 
   @override
@@ -39,27 +27,32 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text("We Share"),
       ),
-      body: Column(
-        children: [
-          Center(
-            child: Text("Welcome, ${user?.firstName} ${user?.lastName}"),
+      body: Center(child: _widgetOptions.elementAt(_currentPageIndex)),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: _onItemTapped,
+        indicatorColor: Colors.amber,
+        selectedIndex: _currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(
+              Icons.paste_rounded,
+              size: 27,
+            ),
+            label: 'Notes',
           ),
-          Center(
-            child: ElevatedButton(
-                onPressed: () async {
-                  sendMail(
-                      recipientEmail: user?.email,
-                      recipientName: user?.firstName);
-                },
-                child: Text("Send OTP")),
+          NavigationDestination(
+            icon: Icon(
+              Icons.text_snippet_rounded,
+              size: 27,
+            ),
+            label: 'Questions',
           ),
-          Center(
-            child: ElevatedButton(
-                onPressed: () async {
-                  await Storage.remove('user');
-                  Navigator.popAndPushNamed(context, "/");
-                },
-                child: Text("Logout")),
+          NavigationDestination(
+            icon: Icon(
+              Icons.travel_explore_rounded,
+              size: 27,
+            ),
+            label: 'Blogs',
           ),
         ],
       ),
