@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:form_validator/form_validator.dart';
+import 'package:toastification/toastification.dart';
 
 class NewPassword extends StatefulWidget {
   const NewPassword({super.key});
@@ -42,6 +44,10 @@ class _NewPasswordState extends State<NewPassword> {
       if (!isSuccess) {
         throw "Error updating password";
       }
+      Toastify(
+          context: context,
+          msg: "Password Successfully Changed",
+          status: ToastStatus.success);
       Navigator.popAndPushNamed(context, "/");
     }
   }
