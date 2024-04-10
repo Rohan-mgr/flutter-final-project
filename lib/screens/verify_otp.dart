@@ -27,6 +27,7 @@ class _VerifyOtpState extends State<VerifyOtp> {
 
     if (otpMatched) {
       //go to new password screen
+      Navigator.popAndPushNamed(context, "/new-password", arguments: email);
     }
 
     setState(() {
