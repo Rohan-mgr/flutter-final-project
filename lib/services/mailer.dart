@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_final_project/helper/helper.dart';
+import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,10 @@ Future<bool> sendMail({String? recipientEmail, String? recipientName}) async {
 
     String otp = generateOTP();
 
+    bool isSuccess =
+        await FirebaseAuthService().storeOTP(otp: otp, email: recipientEmail!);
+
+    if (!isSuccess) return false;
     String htmlContent =
         await rootBundle.loadString('assets/email_template.html');
 
