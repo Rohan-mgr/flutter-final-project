@@ -127,7 +127,10 @@ class _LoginState extends State<Login> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => {/* Forgot password functionality */},
+                    onPressed: () => {
+                      /* Forgot password functionality */
+                      Navigator.pushNamed(context, "/forgot-password")
+                    },
                     child: Text('Forgot Password?'),
                   ),
                 ],

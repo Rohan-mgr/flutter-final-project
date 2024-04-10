@@ -65,6 +65,19 @@ class FirebaseAuthService {
     }
   }
 
+  Future<String> userExists({required String email}) async {
+    var firstName = "";
+    final emailExists =
+        await db.collection("users").where("email", isEqualTo: email).get();
+
+    if (emailExists.docs.isEmpty) {
+      throw "Email address does not exist";
+    }
+    firstName = emailExists.docs[0].data()["firstName"];
+
+    return firstName; //"" or "email";
+  }
+
   // for signing out
   // Future<void> signOut() async {
   //   await _firebaseAuth.signOut();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/screens/forgot_password.dart';
 
 // Import your screen widgets here
 import 'package:flutter_final_project/screens/home_screen.dart';
@@ -10,4 +11,5 @@ Map<String, Widget Function(BuildContext)> get appRoutes => {
       '/home': (context) => Home(),
       '/': (context) => Login(),
       "/signup": (context) => SignUp(),
+      "/forgot-password": (context) => ForgotPassword(),
     };
