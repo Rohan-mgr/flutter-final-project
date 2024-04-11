@@ -17,16 +17,16 @@ class Storage {
   }
 
   // Store a user object (assuming User has toJson() and fromJson())
-  static Future<void> setUser(String key, User user) async {
+  static Future<void> setUser(String key, MyUser user) async {
     await setString(key, jsonEncode(user.toJson()));
   }
 
   // Retrieve a user object
-  static Future<User?> getUser(String key) async {
+  static Future<MyUser?> getUser(String key) async {
     final encodedUser = await getString(key);
     if (encodedUser != null) {
       final userMap = jsonDecode(encodedUser) as Map<String, dynamic>;
-      return User.fromJson(userMap);
+      return MyUser.fromJson(userMap);
     }
     return null;
   }

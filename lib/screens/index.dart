@@ -12,4 +12,5 @@ Map<String, Widget Function(BuildContext)> get appRoutes => {
       '/': (context) => Login(),
       "/signup": (context) => SignUp(),
       "/forgot-password": (context) => ForgotPassword(),
+      // "/notes": (context) => Notes(),
     };

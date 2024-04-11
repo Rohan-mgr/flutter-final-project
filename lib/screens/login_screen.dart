@@ -37,7 +37,7 @@ class _LoginState extends State<Login> {
         setState(() {
           _isSubmitting = true;
         });
-        User? user = await _authService.signInWithEmailAndPassword(
+        MyUser? user = await _authService.signInWithEmailAndPassword(
             emailController.text, passwordController.text);
         if (user == null) {
           throw "User not found";
