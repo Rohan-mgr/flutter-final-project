@@ -1,12 +1,52 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class FirebaseAuthService {
   // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   // Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
+  // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore db = FirebaseFirestore.instance;
+  final storage = FirebaseStorage.instance;
+
+  // Future<User?> signInAnonymously() async {
+  //   try {
+  //     UserCredential userCredential = await _firebaseAuth.signInAnonymously();
+  //     User? user = userCredential.user;
+  //     return user;
+  //   } catch (e) {
+  //     print('Error signing in anonymously: $e');
+  //     return null;
+  //   }
+  // }
+
+  Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
+    try {
+      print('folder path => $folderPath');
+      final storageRef = FirebaseStorage.instance.ref().child(folderPath);
+      final listResult = await storageRef.listAll();
+
+      List<dynamic> foldersAndFiles = [];
+
+      // Add folders to the list
+      for (var prefix in listResult.prefixes) {
+        foldersAndFiles.add({'type': 'folder', 'name': prefix.name});
+      }
+
+      // Add files to the list
+      for (var item in listResult.items) {
+        foldersAndFiles.add({'type': 'file', 'name': item.name});
+      }
+
+      return foldersAndFiles;
+    } catch (e) {
+      print('Error listing folders and files: $e');
+      throw e;
+    }
+  }
 
   Future<void> createUserWithEmailAndPassword(
       String firstName, String lastName, String email, String password) async {
@@ -37,7 +77,7 @@ class FirebaseAuthService {
     }
   }
 
-  Future<User?> signInWithEmailAndPassword(
+  Future<MyUser?> signInWithEmailAndPassword(
       String email, String password) async {
     try {
       final snapshot =
@@ -53,7 +93,7 @@ class FirebaseAuthService {
         throw 'Password is incorrect';
       }
 
-      return User(
+      return MyUser(
         id: snapshot.docs.first.id,
         firstName: userData['firstName'],
         lastName: userData['lastName'],

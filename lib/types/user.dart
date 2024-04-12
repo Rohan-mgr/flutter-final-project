@@ -1,10 +1,10 @@
-class User {
+class MyUser {
   final String id;
   final String firstName;
   final String lastName;
   final String email;
 
-  User({
+  MyUser({
     required this.id,
     required this.firstName,
     required this.lastName,
@@ -18,7 +18,7 @@ class User {
         'email': email,
       };
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
+  factory MyUser.fromJson(Map<String, dynamic> json) => MyUser(
         id: json['id'] as String,
         firstName: json['firstName'] as String,
         lastName: json['lastName'] as String,
