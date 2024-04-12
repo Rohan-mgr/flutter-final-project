@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
+
+
+import 'package:flutter_final_project/services/mailer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
-import 'package:flutter_final_project/services/mailer.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:otp_text_field/otp_text_field.dart';
 
@@ -14,7 +15,9 @@ class VerifyOtp extends StatefulWidget {
 
 class _VerifyOtpState extends State<VerifyOtp> {
   bool _isSubmitting = false;
+
   bool _sendingAgain = false;
+
   String _error = "";
   OtpFieldController otpController = OtpFieldController();
   String? email;
@@ -27,18 +30,20 @@ class _VerifyOtpState extends State<VerifyOtp> {
     bool otpMatched =
     await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
 
+        await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
+
     if (otpMatched) {
-      //go to new password screen
-      Navigator.popAndPushNamed(context, "/new-password", arguments: email);
-    }else{
-    setState(() {
-      _isSubmitting = false;
-      _error = "Invalid OTP";
-    });
+//go to new password screen
+Navigator.popAndPushNamed(context, "/new-password", arguments: email);
+}else{
+setState(() {
+_isSubmitting = false;
+_error = "Invalid OTP";
+});
+}
+
   }
 
-
-  }
 
   void sendAgainHandler() async{
 
@@ -58,6 +63,7 @@ class _VerifyOtpState extends State<VerifyOtp> {
       print("error sending mail");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +100,7 @@ class _VerifyOtpState extends State<VerifyOtp> {
               ),
               _error.isNotEmpty
                   ? Text(
-                      _error!,
+                      _error,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.red, fontWeight: FontWeight.bold),
@@ -117,7 +123,6 @@ class _VerifyOtpState extends State<VerifyOtp> {
               SizedBox(
                 height: 15,
               ),
-
                 _sendingAgain?Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
