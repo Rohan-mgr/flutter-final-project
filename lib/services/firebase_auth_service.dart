@@ -118,6 +118,34 @@ class FirebaseAuthService {
     return firstName; //"" or "email";
   }
 
+  Future<bool> storeOTP({required String otp, required String email}) async {
+    //find user
+    try {
+      final user_ref =
+          await db.collection("users").where("email", isEqualTo: email).get();
+      //store in otp field
+      user_ref.docs[0].reference.update({"one_time_password": otp});
+      return true;
+    } catch (error) {
+      print("Error storing otp");
+      return false;
+    }
+  }
+
+  Future<bool> verifyOTP({required String otp, required String email}) async {
+    try {
+      final user =
+          await db.collection("users").where("email", isEqualTo: email).get();
+      String dbOtp = user.docs.first.data()["one_time_password"];
+
+      if (dbOtp != otp) throw "error";
+      return true;
+    } catch (error) {
+      print("incorrect otp");
+      return false;
+    }
+  }
+
   // for signing out
   // Future<void> signOut() async {
   //   await _firebaseAuth.signOut();

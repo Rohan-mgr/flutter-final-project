@@ -12,6 +12,7 @@ String generateOTP() {
   return otp;
 }
 
+
 enum ToastStatus { success, error }
 
 void Toastify({BuildContext? context, String? msg, ToastStatus? status}) {
