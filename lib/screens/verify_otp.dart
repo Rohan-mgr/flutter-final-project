@@ -25,17 +25,19 @@ class _VerifyOtpState extends State<VerifyOtp> {
       _error = "";
     });
     bool otpMatched =
-        await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
+    await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
 
     if (otpMatched) {
       //go to new password screen
       Navigator.popAndPushNamed(context, "/new-password", arguments: email);
-    }
-
+    }else{
     setState(() {
       _isSubmitting = false;
       _error = "Invalid OTP";
     });
+  }
+
+
   }
 
   void sendAgainHandler() async{
@@ -92,7 +94,7 @@ class _VerifyOtpState extends State<VerifyOtp> {
               ),
               _error.isNotEmpty
                   ? Text(
-                      _error,
+                      _error!,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.red, fontWeight: FontWeight.bold),
