@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/services/mailer.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:otp_text_field/otp_text_field.dart';
 
@@ -12,6 +14,7 @@ class VerifyOtp extends StatefulWidget {
 
 class _VerifyOtpState extends State<VerifyOtp> {
   bool _isSubmitting = false;
+  bool _sendingAgain = false;
   String _error = "";
   OtpFieldController otpController = OtpFieldController();
   String? email;
@@ -33,6 +36,25 @@ class _VerifyOtpState extends State<VerifyOtp> {
       _isSubmitting = false;
       _error = "Invalid OTP";
     });
+  }
+
+  void sendAgainHandler() async{
+
+    setState(() {
+      _sendingAgain = true;
+    });
+    var username = await FirebaseAuthService().userExists(email: email!);
+    bool result =  await sendMail(recipientEmail: email,recipientName: username);
+    Future.delayed( Duration(seconds: 15),() {
+      setState(() {
+        _sendingAgain = false;
+      });
+    },);
+
+
+    if(!result){
+      print("error sending mail");
+    }
   }
 
   @override
@@ -93,25 +115,38 @@ class _VerifyOtpState extends State<VerifyOtp> {
               SizedBox(
                 height: 15,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Didn't receive OTP?",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text("Send Again",
+
+                _sendingAgain?Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Resent Successful",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ))
+                  ],
+                ) :Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Didn't receive OTP?",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        color: Colors.blue,
-                      ))
-                ],
-              ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    GestureDetector(
+                      onTap: sendAgainHandler,
+                      child: Text("Send Again",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.blue,
+                          )),
+                    )
+                  ],
+                )
+            ,
               SizedBox(
                 height: 40,
               ),
