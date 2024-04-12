@@ -105,6 +105,20 @@ class FirebaseAuthService {
     }
   }
 
+  Future<bool> updatePassword(
+      {required String email, required String newPassword}) async {
+    try {
+      final user =
+          await db.collection("users").where("email", isEqualTo: email).get();
+      String hashedPw = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+      user.docs.first.reference.update({"password": hashedPw});
+      return true;
+    } catch (error) {
+      print("Error updating Password");
+      return false;
+    }
+  }
+
   Future<String> userExists({required String email}) async {
     var firstName = "";
     final emailExists =

@@ -4,6 +4,7 @@ import 'package:flutter_final_project/screens/forgot_password.dart';
 // Import your screen widgets here
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/screens/login_screen.dart';
+import 'package:flutter_final_project/screens/new_password.dart';
 import 'package:flutter_final_project/screens/signup_screen.dart';
 import 'package:flutter_final_project/screens/verify_otp.dart';
 

@@ -29,7 +29,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           _error = "";
         });
         var username = await _authService.userExists(email: email);
-        print(email + " " + username);
+
         bool mailSent =
             await sendMail(recipientEmail: email, recipientName: username);
         if (!mailSent) {
