@@ -3,6 +3,7 @@ import 'package:flutter_final_project/services/firebase_auth_service.dart';
 // import 'package:flutter_final_project/services/mailer.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/widgets/Modal.dart';
 import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 
 class Notes extends StatefulWidget {
@@ -72,6 +73,15 @@ class _NotesState extends State<Notes> {
                     Navigator.popAndPushNamed(context, "/");
                   },
                   child: Text("Logout")),
+            ),
+            Container(
+              padding: EdgeInsets.all(15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Modal(),
+                ],
+              ),
             ),
             Breadcrumbs(
               breadCrumbs: breadCrumbs,
