@@ -105,6 +105,20 @@ class FirebaseAuthService {
     }
   }
 
+  Future<bool> updatePassword(
+      {required String email, required String newPassword}) async {
+    try {
+      final user =
+          await db.collection("users").where("email", isEqualTo: email).get();
+      String hashedPw = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+      user.docs.first.reference.update({"password": hashedPw});
+      return true;
+    } catch (error) {
+      print("Error updating Password");
+      return false;
+    }
+  }
+
   Future<String> userExists({required String email}) async {
     var firstName = "";
     final emailExists =
@@ -116,6 +130,34 @@ class FirebaseAuthService {
     firstName = emailExists.docs[0].data()["firstName"];
 
     return firstName; //"" or "email";
+  }
+
+  Future<bool> storeOTP({required String otp, required String email}) async {
+    //find user
+    try {
+      final user_ref =
+          await db.collection("users").where("email", isEqualTo: email).get();
+      //store in otp field
+      user_ref.docs[0].reference.update({"one_time_password": otp});
+      return true;
+    } catch (error) {
+      print("Error storing otp");
+      return false;
+    }
+  }
+
+  Future<bool> verifyOTP({required String otp, required String email}) async {
+    try {
+      final user =
+          await db.collection("users").where("email", isEqualTo: email).get();
+      String dbOtp = user.docs.first.data()["one_time_password"];
+
+      if (dbOtp != otp) throw "error";
+      return true;
+    } catch (error) {
+      print("incorrect otp");
+      return false;
+    }
   }
 
   // for signing out

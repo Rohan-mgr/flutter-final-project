@@ -15,20 +15,21 @@ class ForgotPassword extends StatefulWidget {
 class _ForgotPasswordState extends State<ForgotPassword> {
   String _error = "";
   bool _isSubmitting = false;
+  var email;
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final FirebaseAuthService _authService = FirebaseAuthService();
 
   void sendMailHandler() async {
     if (_formKey.currentState!.validate()) {
-      var email = emailController.text;
+      email = emailController.text;
       try {
         setState(() {
           _isSubmitting = true;
           _error = "";
         });
         var username = await _authService.userExists(email: email);
-        print(email + " " + username);
+
         bool mailSent =
             await sendMail(recipientEmail: email, recipientName: username);
         if (!mailSent) {
@@ -38,7 +39,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             context: context,
             msg: "OTP sent successfully",
             status: ToastStatus.success);
-        Navigator.popAndPushNamed(context, "/");
+        Navigator.popAndPushNamed(context, "/verify-otp", arguments: email);
         //redirect garni kaam
       } catch (error) {
         setState(() {

@@ -163,16 +163,7 @@ class _SignUpState extends State<SignUp> {
                 obscureText: !_showPassword,
               ),
               const SizedBox(height: 10.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => {/* Forgot password functionality */},
-                    child: Text('Forgot Password?'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10.0),
+
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.blue,
