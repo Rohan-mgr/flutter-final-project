@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/screens/home_screen.dart';
+import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 
 class Modal extends StatefulWidget {
-  const Modal({Key? key});
+  final List<String> breadCrumbs;
+  // final Function() onAddFolderTap;
+  const Modal({required this.breadCrumbs});
 
   @override
   State<Modal> createState() => _ModalState();
@@ -32,7 +36,7 @@ class _ModalState extends State<Modal> {
       onPressed: () => showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-          title: const Text('AlertDialog Title'),
+          title: const Text('Create new folder'),
           content: Form(
             key: _formKey,
             child: TextFormField(
@@ -50,11 +54,19 @@ class _ModalState extends State<Modal> {
             TextButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  print(_folderNameController.text);
-                  await FirebaseAuthService().createFolder(
-                      "Notes/Semester II", _folderNameController.text);
+                  final folderPath = widget.breadCrumbs.join("/");
+                  await FirebaseAuthService()
+                      .createFolder(folderPath, _folderNameController.text);
                   _folderNameController.clear();
                   Navigator.pop(context, 'OK');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Home(
+                        initialBreadCrumbs: widget.breadCrumbs,
+                      ),
+                    ),
+                  );
                 }
               },
               child: const Text('OK'),

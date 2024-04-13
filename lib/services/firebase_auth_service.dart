@@ -47,9 +47,10 @@ class FirebaseAuthService {
 
       // Add files to the list
       for (var item in listResult.items) {
-        foldersAndFiles.add({'type': 'file', 'name': item.name});
+        if (!item.name.endsWith(".empty")) {
+          foldersAndFiles.add({'type': 'file', 'name': item.name});
+        }
       }
-
       return foldersAndFiles;
     } catch (e) {
       print('Error listing folders and files: $e');

@@ -7,7 +7,8 @@ import 'package:flutter_final_project/widgets/Modal.dart';
 import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 
 class Notes extends StatefulWidget {
-  const Notes({super.key});
+  final List<String>? initialBreadCrumbs;
+  const Notes({super.key, this.initialBreadCrumbs});
 
   @override
   State<Notes> createState() => _NotesState();
@@ -22,6 +23,9 @@ class _NotesState extends State<Notes> {
   void initState() {
     super.initState();
     loadUserFromLocalStorage();
+    if (widget.initialBreadCrumbs != null) {
+      breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
+    }
     getFilesAndFolders("Notes");
   }
 
@@ -79,7 +83,9 @@ class _NotesState extends State<Notes> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Modal(),
+                  Modal(
+                    breadCrumbs: breadCrumbs,
+                  ),
                 ],
               ),
             ),
@@ -92,7 +98,7 @@ class _NotesState extends State<Notes> {
               },
             ),
             Center(
-                child: folders.length > 1
+                child: folders.length != 0
                     ? ListView.builder(
                         itemBuilder: (BuildContext context, int index) {
                           dynamic item = folders[index];
@@ -105,10 +111,10 @@ class _NotesState extends State<Notes> {
                                     : Colors.black,
                               ),
                             ),
-                            onTap: () {
+                            onTap: () async {
                               if (item['type'] == 'folder') {
                                 breadCrumbs.add(item['name']);
-                                getFilesAndFolders(item['name']);
+                                await getFilesAndFolders(item['name']);
                               } else {
                                 // Handle file tap
                               }

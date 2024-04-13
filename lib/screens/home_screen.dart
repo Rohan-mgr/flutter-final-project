@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_final_project/screens/blogs_screen.dart';
 import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
+import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final List<String>? initialBreadCrumbs;
+  const Home({super.key, this.initialBreadCrumbs});
 
   @override
   State<Home> createState() => _HomeState();
@@ -12,17 +14,41 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _currentPageIndex = 0;
+  List<String> breadCrumbs = [];
 
-  List<Widget> _widgetOptions = <Widget>[Notes(), Questions(), Blogs()];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.initialBreadCrumbs != null) {
+      breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _currentPageIndex = index;
+      breadCrumbs = [];
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // final args = ModalRoute.of(context)?.settings.arguments as Map?;
+    // // final breadcrumbs = args?['breadCrumbs'];
+    // final breadcrumbs = args != null &&
+    //         args.containsKey('fromModal') &&
+    //         args['fromModal'] == true
+    //     ? args['breadCrumbs']
+    //     : null;
+    print('breadcrumbs home => $breadCrumbs');
+
+    List<Widget> _widgetOptions = <Widget>[
+      Notes(initialBreadCrumbs: breadCrumbs),
+      Questions(),
+      Blogs()
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text("We Share"),
