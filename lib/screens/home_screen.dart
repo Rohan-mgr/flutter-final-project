@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_final_project/screens/blogs_screen.dart';
 import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
@@ -45,10 +46,15 @@ class _HomeState extends State<Home> {
       body: Center(child: _widgetOptions.elementAt(_currentPageIndex)),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: _onItemTapped,
-        indicatorColor: Colors.amber,
+        indicatorColor: Colors.deepPurple,
         selectedIndex: _currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
+            selectedIcon: Icon(
+              Icons.paste_rounded,
+              size: 27,
+              color: Colors.white,
+            ),
             icon: Icon(
               Icons.paste_rounded,
               size: 27,
@@ -56,6 +62,11 @@ class _HomeState extends State<Home> {
             label: 'Notes',
           ),
           NavigationDestination(
+            selectedIcon: Icon(
+              Icons.text_snippet_rounded,
+              size: 27,
+              color: Colors.white,
+            ),
             icon: Icon(
               Icons.text_snippet_rounded,
               size: 27,
@@ -63,6 +74,11 @@ class _HomeState extends State<Home> {
             label: 'Questions',
           ),
           NavigationDestination(
+            selectedIcon: Icon(
+              Icons.travel_explore_rounded,
+              size: 27,
+              color: Colors.white,
+            ),
             icon: Icon(
               Icons.travel_explore_rounded,
               size: 27,
