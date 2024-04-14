@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_final_project/screens/blogs_screen.dart';
 import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
-import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 
 class Home extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
@@ -18,7 +17,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
@@ -34,15 +32,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    // final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    // // final breadcrumbs = args?['breadCrumbs'];
-    // final breadcrumbs = args != null &&
-    //         args.containsKey('fromModal') &&
-    //         args['fromModal'] == true
-    //     ? args['breadCrumbs']
-    //     : null;
-    print('breadcrumbs home => $breadCrumbs');
-
     List<Widget> _widgetOptions = <Widget>[
       Notes(initialBreadCrumbs: breadCrumbs),
       Questions(),

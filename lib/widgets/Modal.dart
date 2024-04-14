@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
-import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 
 class Modal extends StatefulWidget {
   final List<String> breadCrumbs;
@@ -14,6 +14,7 @@ class Modal extends StatefulWidget {
 
 class _ModalState extends State<Modal> {
   final _formKey = GlobalKey<FormState>();
+  bool _isFolderCreated = false;
 
   TextEditingController _folderNameController = TextEditingController();
 
@@ -21,6 +22,39 @@ class _ModalState extends State<Modal> {
   void dispose() {
     _folderNameController.dispose();
     super.dispose();
+  }
+
+  void handleAddFolderClick() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        setState(() {
+          _isFolderCreated = true;
+        });
+        final folderPath = widget.breadCrumbs.join("/");
+        bool folderCreationStatus = await FirebaseAuthService()
+            .createFolder(folderPath, _folderNameController.text);
+        if (!folderCreationStatus) {
+          throw "Error creating folder";
+        }
+        _folderNameController.clear();
+
+        Navigator.pop(context, 'Add folder');
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Home(
+              initialBreadCrumbs: widget.breadCrumbs,
+            ),
+          ),
+        );
+      } catch (error) {
+        print("Error creating folder: $error");
+        setState(() {
+          _isFolderCreated = false;
+        });
+      }
+    }
   }
 
   @override
@@ -52,24 +86,10 @@ class _ModalState extends State<Modal> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  final folderPath = widget.breadCrumbs.join("/");
-                  await FirebaseAuthService()
-                      .createFolder(folderPath, _folderNameController.text);
-                  _folderNameController.clear();
-                  Navigator.pop(context, 'OK');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Home(
-                        initialBreadCrumbs: widget.breadCrumbs,
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('OK'),
+              onPressed: handleAddFolderClick,
+              child: _isFolderCreated
+                  ? Loader(size: 23, color: Colors.deepPurple)
+                  : const Text('Add folder'),
             ),
           ],
         ),

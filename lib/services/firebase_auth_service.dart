@@ -12,9 +12,8 @@ class FirebaseAuthService {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   final storage = FirebaseStorage.instance;
 
-  Future<void> createFolder(String folderPath, String folderName) async {
+  Future<bool> createFolder(String folderPath, String folderName) async {
     try {
-      print("Creating folder: $folderPath");
       final reference = FirebaseStorage.instance.ref().child(folderPath +
           "/" +
           folderName +
@@ -27,8 +26,10 @@ class FirebaseAuthService {
       await reference.putString(dataUrl,
           format: PutStringFormat.dataUrl, metadata: newMetaData);
       print("Folder created (simulated) at: $folderPath");
+      return true;
     } catch (error) {
       print("Error creating folder: $error");
+      return false;
     }
   }
 
