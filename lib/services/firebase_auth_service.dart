@@ -75,7 +75,12 @@ class FirebaseAuthService {
       // Add files to the list
       for (var item in listResult.items) {
         if (!item.name.endsWith(".empty")) {
-          foldersAndFiles.add({'type': 'file', 'name': item.name});
+          String mimeType = item.fullPath.split(".").last;
+          foldersAndFiles.add({
+            'type': 'file',
+            'name': item.name,
+            'mimeType': mimeType,
+          });
         }
       }
       return foldersAndFiles;
