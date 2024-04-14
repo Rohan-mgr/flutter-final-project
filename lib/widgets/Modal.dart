@@ -40,6 +40,7 @@ class _ModalState extends State<Modal> {
 
         Navigator.pop(context, 'Add folder');
 
+        Navigator.pop(context);
         Navigator.push(
           context,
           MaterialPageRoute(

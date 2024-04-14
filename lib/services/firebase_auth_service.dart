@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import "dart:io";
 
 class FirebaseAuthService {
   // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -31,6 +32,31 @@ class FirebaseAuthService {
       print("Error creating folder: $error");
       return false;
     }
+  }
+
+  Future<void> uploadFileToFirebase(File file, String folderPath) async {
+    // Create a storage reference with a unique filename
+    String fileName = file.path.split("/").last;
+    final storageRef = storage.ref().child(
+        '$folderPath/$fileName'); // Replace with your desired folder path
+
+    // Upload the file to Firebase Storage
+    final uploadTask = storageRef.putFile(file);
+
+    // Track upload progress (optional)
+    uploadTask.snapshotEvents.listen((event) {
+      int progress =
+          ((event.bytesTransferred / event.totalBytes) * 100).round();
+      // Display upload progress (e.g., with a progress bar)
+      print('Upload progress: $progress%');
+    });
+
+    // Wait for the upload to complete
+    await uploadTask.whenComplete(() => print('Upload complete'));
+
+    // Get the download URL for the uploaded file
+    final downloadUrl = await storageRef.getDownloadURL();
+    print('Download URL: $downloadUrl');
   }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
