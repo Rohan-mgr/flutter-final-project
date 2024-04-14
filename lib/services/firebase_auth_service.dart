@@ -12,21 +12,31 @@ class FirebaseAuthService {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   final storage = FirebaseStorage.instance;
 
-  // Future<User?> signInAnonymously() async {
-  //   try {
-  //     UserCredential userCredential = await _firebaseAuth.signInAnonymously();
-  //     User? user = userCredential.user;
-  //     return user;
-  //   } catch (e) {
-  //     print('Error signing in anonymously: $e');
-  //     return null;
-  //   }
-  // }
+  Future<bool> createFolder(String folderPath, String folderName) async {
+    try {
+      final reference = FirebaseStorage.instance.ref().child(folderPath +
+          "/" +
+          folderName +
+          "/.empty"); // Add ".empty" to filename
+      final newMetaData = SettableMetadata(
+        contentType: 'text/plain',
+        customMetadata: {'folderName': folderName},
+      );
+      String dataUrl = 'data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==';
+      await reference.putString(dataUrl,
+          format: PutStringFormat.dataUrl, metadata: newMetaData);
+      print("Folder created (simulated) at: $folderPath");
+      return true;
+    } catch (error) {
+      print("Error creating folder: $error");
+      return false;
+    }
+  }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
     try {
       print('folder path => $folderPath');
-      final storageRef = FirebaseStorage.instance.ref().child(folderPath);
+      final storageRef = storage.ref().child(folderPath);
       final listResult = await storageRef.listAll();
 
       List<dynamic> foldersAndFiles = [];
@@ -38,9 +48,10 @@ class FirebaseAuthService {
 
       // Add files to the list
       for (var item in listResult.items) {
-        foldersAndFiles.add({'type': 'file', 'name': item.name});
+        if (!item.name.endsWith(".empty")) {
+          foldersAndFiles.add({'type': 'file', 'name': item.name});
+        }
       }
-
       return foldersAndFiles;
     } catch (e) {
       print('Error listing folders and files: $e');
