@@ -210,33 +210,43 @@ class _NotesState extends State<Notes> {
                 getFilesAndFolders(breadCrumbs[index]);
               },
             ),
-            Center(
+            Container(
+                height: 400,
                 child: folders.length != 0
-                    ? ListView.builder(
-                        itemBuilder: (BuildContext context, int index) {
-                          dynamic item = folders[index];
-                          return ListTile(
-                            title: Text(
-                              item['name'],
-                              style: TextStyle(
-                                color: item['type'] == 'folder'
-                                    ? Colors.blue
-                                    : Colors.black,
-                              ),
-                            ),
-                            onTap: () async {
-                              if (item['type'] == 'folder') {
-                                breadCrumbs.add(item['name']);
-                                await getFilesAndFolders(item['name']);
-                              } else {
-                                // Handle file tap
-                              }
+                    ? ListView(children: [
+                        GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2, childAspectRatio: 3 / 1),
+                            itemBuilder: (BuildContext context, int index) {
+                              dynamic item = folders[index];
+                              return Container(
+                                margin: EdgeInsets.all(5),
+                                child: ListTile(
+                                  leading: Icon(Icons.file_copy),
+                                  title: Text(
+                                    item['name'],
+                                    style: TextStyle(
+                                      color: item['type'] == 'folder'
+                                          ? Colors.blue
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    if (item['type'] == 'folder') {
+                                      breadCrumbs.add(item['name']);
+                                      await getFilesAndFolders(item['name']);
+                                    } else {
+                                      // Handle file tap
+                                    }
+                                  },
+                                ),
+                              );
                             },
-                          );
-                        },
-                        itemCount: folders.length,
-                        shrinkWrap: true,
-                        physics: ClampingScrollPhysics())
+                            itemCount: folders.length,
+                            shrinkWrap: true,
+                            physics: ClampingScrollPhysics()),
+                      ])
                     : Text("There is no files here yet")),
           ],
         ),
