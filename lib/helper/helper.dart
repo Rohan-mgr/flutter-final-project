@@ -12,7 +12,6 @@ String generateOTP() {
   return otp;
 }
 
-
 enum ToastStatus { success, error }
 
 void Toastify({BuildContext? context, String? msg, ToastStatus? status}) {
@@ -62,4 +61,12 @@ BootstrapAlert Alert(BuildContext context, String errMsg, ToastStatus status) {
     isDismissible: true,
     text: errMsg,
   );
+}
+
+String truncateFilename(String filename) {
+  if (filename.length <= 37) {
+    return filename;
+  }
+  // Truncate the filename and add "..."
+  return filename.substring(0, 37) + " ...";
 }

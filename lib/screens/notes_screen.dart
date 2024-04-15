@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/helper/storage.dart';
@@ -80,7 +80,7 @@ class _NotesState extends State<Notes> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'jpg'],
+      allowedExtensions: ['pdf', 'doc', 'jpg', 'docx', 'ppt', 'pptx', 'jpeg'],
     );
 
     if (result != null) {
@@ -176,6 +176,8 @@ class _NotesState extends State<Notes> {
               child: ElevatedButton(
                   onPressed: () async {
                     await Storage.remove('user');
+                    String? user = await Storage.getString('user');
+                    print("localStorage => $user");
                     Navigator.popAndPushNamed(context, "/");
                   },
                   child: Text("Logout")),
@@ -207,9 +209,25 @@ class _NotesState extends State<Notes> {
                       ],
                     ),
                   ),
-                  Modal(
-                    breadCrumbs: breadCrumbs,
+                  IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => Modal(
+                          breadCrumbs: breadCrumbs,
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.create_new_folder_rounded,
+                      size: 40,
+                      color: Colors.deepPurple,
+                    ),
                   ),
+                  // Modal(
+                  //   breadCrumbs: breadCrumbs,
+                  // ),
+                  // Modal(context),
                 ],
               ),
             ),
@@ -243,7 +261,7 @@ class _NotesState extends State<Notes> {
                                         children: [
                                           Container(
                                             child: Text(
-                                              item['name'],
+                                              truncateFilename(item['name']),
                                             ),
                                           ),
                                           if (item['type'] == 'file')

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_final_project/screens/blogs_screen.dart';
 import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';

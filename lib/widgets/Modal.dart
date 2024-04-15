@@ -5,31 +5,23 @@ import 'package:flutter_final_project/widgets/loader.dart';
 
 class Modal extends StatefulWidget {
   final List<String> breadCrumbs;
-  // final Function() onAddFolderTap;
   const Modal({required this.breadCrumbs});
-
   @override
-  State<Modal> createState() => _ModalState();
+  _ModalState createState() => _ModalState();
 }
 
 class _ModalState extends State<Modal> {
+  final _folderNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isFolderCreated = false;
-
-  TextEditingController _folderNameController = TextEditingController();
-
-  @override
-  void dispose() {
-    _folderNameController.dispose();
-    super.dispose();
-  }
+  bool isLoading = false;
 
   void handleAddFolderClick() async {
     if (_formKey.currentState!.validate()) {
       try {
         setState(() {
-          _isFolderCreated = true;
+          isLoading = true;
         });
+        print('isLoading => $isLoading');
         final folderPath = widget.breadCrumbs.join("/");
         bool folderCreationStatus = await FirebaseAuthService()
             .createFolder(folderPath, _folderNameController.text);
@@ -39,7 +31,6 @@ class _ModalState extends State<Modal> {
         _folderNameController.clear();
 
         Navigator.pop(context, 'Add folder');
-
         Navigator.pop(context);
         Navigator.push(
           context,
@@ -52,7 +43,7 @@ class _ModalState extends State<Modal> {
       } catch (error) {
         print("Error creating folder: $error");
         setState(() {
-          _isFolderCreated = false;
+          isLoading = false;
         });
       }
     }
@@ -67,38 +58,66 @@ class _ModalState extends State<Modal> {
       return null; // Validation successful
     }
 
-    return TextButton(
-      onPressed: () => showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Create new folder'),
-          content: Form(
-            key: _formKey,
-            child: TextFormField(
-                controller: _folderNameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter Folder Name',
-                ),
-                validator: validateFolderName),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancel'),
-              child: const Text('Cancel'),
+    return AlertDialog(
+      content: Container(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    "Create a new Folder",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                )
+              ],
             ),
-            TextButton(
-              onPressed: handleAddFolderClick,
-              child: _isFolderCreated
-                  ? Loader(size: 23, color: Colors.deepPurple)
-                  : const Text('Add folder'),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                      controller: _folderNameController,
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.deepPurple, width: 2.0),
+                        ),
+                        hintText: 'Enter folder name',
+                        border: UnderlineInputBorder(),
+                        labelStyle: new TextStyle(color: Colors.deepPurple),
+                      ),
+                      validator: validateFolderName),
+                  SizedBox(height: 20.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Cancel',
+                            style: TextStyle(color: Colors.deepPurple)),
+                      ),
+                      SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: handleAddFolderClick,
+                        child: Container(
+                            child: isLoading
+                                ? Loader(size: 20, color: Colors.deepPurple)
+                                : Text(
+                                    'Add folder',
+                                    style: TextStyle(color: Colors.deepPurple),
+                                  )),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ),
-      child: Icon(
-        Icons.create_new_folder_rounded,
-        size: 30,
-        color: Colors.deepPurple,
       ),
     );
   }
