@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/helper/storage.dart';
@@ -9,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import "dart:io";
 
 import 'package:flutter_final_project/widgets/centraltextloader.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 
 class Notes extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
@@ -23,6 +25,8 @@ class _NotesState extends State<Notes> {
   List<dynamic> folders = [];
   List<String> breadCrumbs = [];
   // List<File?> _files = [];
+  bool _isLoading = false;
+  int selectedFolderIndex = -1;
 
   @override
   void initState() {
@@ -36,6 +40,9 @@ class _NotesState extends State<Notes> {
 
   Future<void> getFilesAndFolders(String folderName) async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       // initially add Notes to the breadcrumbs
       if (breadCrumbs.length < 1) {
         breadCrumbs.add(folderName);
@@ -46,9 +53,13 @@ class _NotesState extends State<Notes> {
           await FirebaseAuthService().listFoldersAndFiles(folderPath);
       setState(() {
         folders = foldersName;
+        _isLoading = false;
       });
     } catch (error) {
       print("Error getting files: $error");
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -215,23 +226,98 @@ class _NotesState extends State<Notes> {
                     ? ListView.builder(
                         itemBuilder: (BuildContext context, int index) {
                           dynamic item = folders[index];
-                          return ListTile(
-                            title: Text(
-                              item['name'],
-                              style: TextStyle(
-                                color: item['type'] == 'folder'
-                                    ? Colors.blue
-                                    : Colors.black,
+                          return Column(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(
+                                    left: 10, right: 10, top: 2, bottom: 2),
+                                color: Color.fromARGB(255, 240, 238, 247),
+                                child: ListTile(
+                                  title: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            child: Text(
+                                              item['name'],
+                                            ),
+                                          ),
+                                          if (item['type'] == 'file')
+                                            Row(
+                                              children: [
+                                                Icon(Icons.cloud_done_outlined,
+                                                    size: 17,
+                                                    color: Colors.grey),
+                                                Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 5),
+                                                  child: Text(
+                                                    item['fileSize'],
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                Icon(Icons.access_time_sharp,
+                                                    size: 16,
+                                                    color: Colors.grey),
+                                                Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 5),
+                                                  child: Text(
+                                                    item['createdAt'],
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                Icon(Icons.person_2_outlined,
+                                                    size: 16,
+                                                    color: Colors.grey),
+                                                Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 5),
+                                                  child: Text(
+                                                    item['uploadedBy'],
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                        ],
+                                      ),
+                                      if (_isLoading &&
+                                          index == selectedFolderIndex &&
+                                          item['type'] == 'folder')
+                                        Loader(
+                                            size: 20, color: Colors.deepPurple),
+                                    ],
+                                  ),
+                                  onTap: () async {
+                                    if (item['type'] == 'folder') {
+                                      breadCrumbs.add(item['name']);
+                                      setState(() {
+                                        selectedFolderIndex = index;
+                                      });
+                                      await getFilesAndFolders(item['name']);
+                                      setState(() {
+                                        selectedFolderIndex = -1;
+                                      });
+                                    } else {
+                                      // Handle file tap
+                                    }
+                                  },
+                                ),
                               ),
-                            ),
-                            onTap: () async {
-                              if (item['type'] == 'folder') {
-                                breadCrumbs.add(item['name']);
-                                await getFilesAndFolders(item['name']);
-                              } else {
-                                // Handle file tap
-                              }
-                            },
+                            ],
                           );
                         },
                         itemCount: folders.length,
