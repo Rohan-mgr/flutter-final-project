@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_final_project/helper/storage.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import "dart:io";
+import 'package:intl/intl.dart';
 
 class FirebaseAuthService {
   // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -35,13 +37,22 @@ class FirebaseAuthService {
   }
 
   Future<void> uploadFileToFirebase(File file, String folderPath) async {
+    final loggedUser = await Storage.getUser("user");
+    String? loggedUsername = loggedUser?.firstName ?? "";
+    print("loggedUser file upload => ${loggedUsername}");
     // Create a storage reference with a unique filename
     String fileName = file.path.split("/").last;
-    final storageRef = storage.ref().child(
-        '$folderPath/$fileName'); // Replace with your desired folder path
+    final storageRef = storage.ref().child('$folderPath/$fileName');
 
-    // Upload the file to Firebase Storage
-    final uploadTask = storageRef.putFile(file);
+    // Define custom metadata
+    final metadata = SettableMetadata(
+      customMetadata: {
+        'uploadBy': loggedUsername,
+      },
+    );
+
+    // Upload the file to Firebase Storage with custom metadata
+    final uploadTask = storageRef.putFile(file, metadata);
 
     // Track upload progress (optional)
     uploadTask.snapshotEvents.listen((event) {
@@ -53,10 +64,6 @@ class FirebaseAuthService {
 
     // Wait for the upload to complete
     await uploadTask.whenComplete(() => print('Upload complete'));
-
-    // Get the download URL for the uploaded file
-    final downloadUrl = await storageRef.getDownloadURL();
-    print('Download URL: $downloadUrl');
   }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
@@ -73,16 +80,44 @@ class FirebaseAuthService {
       }
 
       // Add files to the list
-      for (var item in listResult.items) {
-        if (!item.name.endsWith(".empty")) {
-          String mimeType = item.fullPath.split(".").last;
-          foldersAndFiles.add({
-            'type': 'file',
-            'name': item.name,
-            'mimeType': mimeType,
-          });
-        }
+      // Filter out items without metadata
+      final itemsWithMetadata = listResult.items
+          .where((item) => !item.name.endsWith(".empty"))
+          .toList();
+
+      final metadataFutures = itemsWithMetadata
+          .map((item) => storage.ref().child(item.fullPath).getMetadata());
+
+      // Wait for all metadata requests to complete
+      final List<FullMetadata> metadataList =
+          await Future.wait(metadataFutures);
+
+      // Process metadata and add files to the list
+      for (int i = 0; i < itemsWithMetadata.length; i++) {
+        final item = itemsWithMetadata[i];
+        final metadata = metadataList[i];
+
+        final sizeInKB = (metadata.size ?? 0) / 1000;
+        final size = sizeInKB < 1000
+            ? '${sizeInKB.toStringAsFixed(2)} KB'
+            : '${(sizeInKB / 1000).toStringAsFixed(2)} MB';
+
+        final createdAt = DateFormat('yyyy-MM-dd HH:mm a', 'en_US')
+            .format(metadata.timeCreated!);
+        final uploadedBy = metadata.customMetadata?['uploadBy'] ?? '';
+        final mimeType = item.fullPath.split(".").last;
+
+        foldersAndFiles.add({
+          'type': 'file',
+          'name': item.name,
+          'fullPath': item.fullPath,
+          'mimeType': mimeType,
+          'createdAt': createdAt,
+          'fileSize': size,
+          'uploadedBy': uploadedBy,
+        });
       }
+
       return foldersAndFiles;
     } catch (e) {
       print('Error listing folders and files: $e');
