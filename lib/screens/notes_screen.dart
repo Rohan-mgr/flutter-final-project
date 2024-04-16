@@ -11,6 +11,7 @@ import "dart:io";
 
 import 'package:flutter_final_project/widgets/centraltextloader.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
+import 'package:flutter_final_project/widgets/popUpMenu.dart';
 
 class Notes extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
@@ -24,9 +25,7 @@ class _NotesState extends State<Notes> {
   MyUser? user;
   List<dynamic> folders = [];
   List<String> breadCrumbs = [];
-  // List<File?> _files = [];
   bool _isLoading = false;
-  int selectedFolderIndex = -1;
 
   @override
   void initState() {
@@ -80,7 +79,16 @@ class _NotesState extends State<Notes> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'jpg', 'docx', 'ppt', 'pptx', 'jpeg'],
+      allowedExtensions: [
+        'pdf',
+        'doc',
+        'jpg',
+        'docx',
+        'ppt',
+        'pptx',
+        'jpeg',
+        'txt'
+      ],
     );
 
     if (result != null) {
@@ -124,7 +132,6 @@ class _NotesState extends State<Notes> {
           );
 
           String folderPath = breadCrumbs.join("/");
-          print('breadCrums in notes_screen.dart>>>>>> $breadCrumbs');
           await FirebaseAuthService().uploadFileToFirebase(file, folderPath);
           uploadedFiles++;
           Navigator.of(context).pop();
@@ -176,8 +183,6 @@ class _NotesState extends State<Notes> {
               child: ElevatedButton(
                   onPressed: () async {
                     await Storage.remove('user');
-                    String? user = await Storage.getString('user');
-                    print("localStorage => $user");
                     Navigator.popAndPushNamed(context, "/");
                   },
                   child: Text("Logout")),
@@ -224,10 +229,6 @@ class _NotesState extends State<Notes> {
                       color: Colors.deepPurple,
                     ),
                   ),
-                  // Modal(
-                  //   breadCrumbs: breadCrumbs,
-                  // ),
-                  // Modal(context),
                 ],
               ),
             ),
@@ -239,109 +240,141 @@ class _NotesState extends State<Notes> {
                 getFilesAndFolders(breadCrumbs[index]);
               },
             ),
-            Center(
-                child: folders.length != 0
-                    ? ListView.builder(
-                        itemBuilder: (BuildContext context, int index) {
-                          dynamic item = folders[index];
-                          return Column(
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(
-                                    left: 10, right: 10, top: 2, bottom: 2),
-                                color: Color.fromARGB(255, 240, 238, 247),
-                                child: ListTile(
-                                  title: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+            _isLoading
+                ? Positioned(
+                    top: 50,
+                    child: Center(
+                      child: Loader(
+                        size: 35,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: folders.length != 0
+                        ? ListView.builder(
+                            itemBuilder: (BuildContext context, int index) {
+                              dynamic item = folders[index];
+                              return Column(
+                                children: [
+                                  Container(
+                                    // padding: EdgeInsets.all(0),
+                                    margin: EdgeInsets.only(
+                                        left: 5, right: 5, top: 2, bottom: 2),
+                                    color: Color.fromARGB(255, 240, 238, 247),
+                                    child: ListTile(
+                                      title: Row(
                                         children: [
-                                          Container(
-                                            child: Text(
-                                              truncateFilename(item['name']),
-                                            ),
+                                          (item['type'] == 'folder')
+                                              ? Container(
+                                                  margin: EdgeInsets.only(
+                                                      right: 10),
+                                                  child: Icon(
+                                                    Icons.folder,
+                                                    color: Colors.deepPurple,
+                                                    size: 32,
+                                                  ),
+                                                )
+                                              : Container(
+                                                  margin: EdgeInsets.only(
+                                                      right: 10),
+                                                  child: Icon(
+                                                    Icons.insert_drive_file,
+                                                    color: Colors.deepPurple,
+                                                    size: 32,
+                                                  ),
+                                                ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Text(
+                                                  truncateFilename(
+                                                      item['name']),
+                                                ),
+                                              ),
+                                              if (item['type'] == 'file')
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                        Icons
+                                                            .cloud_done_outlined,
+                                                        size: 17,
+                                                        color: Colors.grey),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 5),
+                                                      child: Text(
+                                                        item['fileSize'],
+                                                        style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.grey),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Icon(
+                                                        Icons.access_time_sharp,
+                                                        size: 16,
+                                                        color: Colors.grey),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 5),
+                                                      child: Text(
+                                                        item['createdAt'],
+                                                        style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.grey),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Icon(
+                                                        Icons.person_2_outlined,
+                                                        size: 16,
+                                                        color: Colors.grey),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 5),
+                                                      child: Text(
+                                                        item['uploadedBy'],
+                                                        style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.grey),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                            ],
                                           ),
+                                          Spacer(),
                                           if (item['type'] == 'file')
-                                            Row(
-                                              children: [
-                                                Icon(Icons.cloud_done_outlined,
-                                                    size: 17,
-                                                    color: Colors.grey),
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 5),
-                                                  child: Text(
-                                                    item['fileSize'],
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.grey),
-                                                  ),
-                                                ),
-                                                SizedBox(width: 5),
-                                                Icon(Icons.access_time_sharp,
-                                                    size: 16,
-                                                    color: Colors.grey),
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 5),
-                                                  child: Text(
-                                                    item['createdAt'],
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.grey),
-                                                  ),
-                                                ),
-                                                SizedBox(width: 5),
-                                                Icon(Icons.person_2_outlined,
-                                                    size: 16,
-                                                    color: Colors.grey),
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 5),
-                                                  child: Text(
-                                                    item['uploadedBy'],
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.grey),
-                                                  ),
-                                                ),
-                                              ],
+                                            PopUpMenu(
+                                              file: item,
+                                              breadCrumbs: breadCrumbs,
                                             ),
                                         ],
                                       ),
-                                      if (_isLoading &&
-                                          index == selectedFolderIndex &&
-                                          item['type'] == 'folder')
-                                        Loader(
-                                            size: 20, color: Colors.deepPurple),
-                                    ],
+                                      onTap: () async {
+                                        if (item['type'] == 'folder') {
+                                          breadCrumbs.add(item['name']);
+                                          setState(() {});
+                                          await getFilesAndFolders(
+                                              item['name']);
+                                          setState(() {});
+                                        } else {
+                                          // Handle file tap
+                                        }
+                                      },
+                                    ),
                                   ),
-                                  onTap: () async {
-                                    if (item['type'] == 'folder') {
-                                      breadCrumbs.add(item['name']);
-                                      setState(() {
-                                        selectedFolderIndex = index;
-                                      });
-                                      await getFilesAndFolders(item['name']);
-                                      setState(() {
-                                        selectedFolderIndex = -1;
-                                      });
-                                    } else {
-                                      // Handle file tap
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                        itemCount: folders.length,
-                        shrinkWrap: true,
-                        physics: ClampingScrollPhysics())
-                    : Text("There is no files here yet")),
+                                ],
+                              );
+                            },
+                            itemCount: folders.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            physics: ClampingScrollPhysics())
+                        : Text("There is no files here yet")),
           ],
         ),
       ),
