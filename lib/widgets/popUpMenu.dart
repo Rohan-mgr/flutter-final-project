@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
+import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PopUpMenu extends StatefulWidget {
   final dynamic file;
@@ -120,6 +124,39 @@ class _PopUpMenuState extends State<PopUpMenu> {
           });
     }
 
+    void handlePreviewFile(file) async {
+      print('Download file => ${file.toString()}');
+      try {
+        final downloadedFile = await FirebaseAuthService()
+            .downloadFilePrivately(file['name'], file['fullPath']);
+        print('Downloaded file: $downloadedFile');
+
+        if (downloadedFile == null) return;
+
+        // Check and request permissions if necessary (Android)
+        if (Platform.isAndroid) {
+          print("inside permission");
+          final status = await Permission.storage.request();
+          if (status != PermissionStatus.granted) {
+            throw Exception('Storage permission required');
+          }
+        }
+
+        try {
+          await OpenFile.open(downloadedFile.path);
+        } on Exception catch (e) {
+          // Handle exception for unsupported file types
+          print('Error opening file: $e');
+          // Try using url_launcher to launch the default app
+          // (consider checking supported mime types first)
+          // await launch(downloadedFile.path);
+        }
+      } catch (e) {
+        print('Error downloading file: $e');
+        throw e;
+      }
+    }
+
     return Row(
       children: [
         PopupMenuButton<int>(
@@ -128,6 +165,8 @@ class _PopUpMenuState extends State<PopUpMenu> {
             // Handle menu item selection (optional)
             if (value == 3) {
               handleRemoveBtnClick(widget.file);
+            } else if (value == 1) {
+              handlePreviewFile(widget.file);
             }
           },
           itemBuilder: (context) => [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/check_permission.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
@@ -26,11 +27,23 @@ class _NotesState extends State<Notes> {
   List<dynamic> folders = [];
   List<String> breadCrumbs = [];
   bool _isLoading = false;
+  bool isPermission = false;
+  var checkAllPermissions = CheckPermission();
+
+  checkPermission() async {
+    var permission = await checkAllPermissions.isStoragePermission();
+    if (permission) {
+      setState(() {
+        isPermission = true;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     loadUserFromLocalStorage();
+    checkPermission();
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
     }
@@ -251,7 +264,7 @@ class _NotesState extends State<Notes> {
                     ),
                   )
                 : Center(
-                    child: folders.length != 0
+                    child: folders.length != 0 && isPermission
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
                               dynamic item = folders[index];
@@ -261,8 +274,9 @@ class _NotesState extends State<Notes> {
                                     // padding: EdgeInsets.all(0),
                                     margin: EdgeInsets.only(
                                         left: 5, right: 5, top: 2, bottom: 2),
-                                    color: Color.fromARGB(255, 240, 238, 247),
+                                    color: Color.fromRGBO(240, 238, 247, 1),
                                     child: ListTile(
+                                      contentPadding: EdgeInsets.only(left: 5),
                                       title: Row(
                                         children: [
                                           (item['type'] == 'folder')
