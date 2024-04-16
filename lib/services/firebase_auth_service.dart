@@ -36,6 +36,18 @@ class FirebaseAuthService {
     }
   }
 
+  Future<bool> deleteFile(String fullPath) async {
+    try {
+      final storageRef = storage.ref().child(fullPath);
+      await storageRef.delete();
+      print('File deleted successfully');
+      return true;
+    } catch (e) {
+      print('Error deleting file: $e');
+      return false;
+    }
+  }
+
   Future<void> uploadFileToFirebase(File file, String folderPath) async {
     final loggedUser = await Storage.getUser("user");
     String? loggedUsername = loggedUser?.firstName ?? "";
@@ -102,8 +114,8 @@ class FirebaseAuthService {
             ? '${sizeInKB.toStringAsFixed(2)} KB'
             : '${(sizeInKB / 1000).toStringAsFixed(2)} MB';
 
-        final createdAt = DateFormat('yyyy-MM-dd HH:mm a', 'en_US')
-            .format(metadata.timeCreated!);
+        final createdAt =
+            DateFormat('yyyy-MM-dd', 'en_US').format(metadata.timeCreated!);
         final uploadedBy = metadata.customMetadata?['uploadBy'] ?? '';
         final mimeType = item.fullPath.split(".").last;
 

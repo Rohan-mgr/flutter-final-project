@@ -64,9 +64,9 @@ BootstrapAlert Alert(BuildContext context, String errMsg, ToastStatus status) {
 }
 
 String truncateFilename(String filename) {
-  if (filename.length <= 37) {
+  if (filename.length <= 30) {
     return filename;
   }
   // Truncate the filename and add "..."
-  return filename.substring(0, 37) + " ...";
+  return filename.substring(0, 30) + " ...";
 }
