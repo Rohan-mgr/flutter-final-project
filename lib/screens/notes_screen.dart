@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/helper/check_permission.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
@@ -27,23 +26,11 @@ class _NotesState extends State<Notes> {
   List<dynamic> folders = [];
   List<String> breadCrumbs = [];
   bool _isLoading = false;
-  bool isPermission = false;
-  var checkAllPermissions = CheckPermission();
-
-  checkPermission() async {
-    var permission = await checkAllPermissions.isStoragePermission();
-    if (permission) {
-      setState(() {
-        isPermission = true;
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     loadUserFromLocalStorage();
-    checkPermission();
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
     }
@@ -100,7 +87,9 @@ class _NotesState extends State<Notes> {
         'ppt',
         'pptx',
         'jpeg',
-        'txt'
+        'txt',
+        'mp3',
+        'mp4'
       ],
     );
 
@@ -264,7 +253,7 @@ class _NotesState extends State<Notes> {
                     ),
                   )
                 : Center(
-                    child: folders.length != 0 && isPermission
+                    child: folders.length != 0
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
                               dynamic item = folders[index];
@@ -377,6 +366,7 @@ class _NotesState extends State<Notes> {
                                           setState(() {});
                                         } else {
                                           // Handle file tap
+                                          handlePreviewFile(context, item);
                                         }
                                       },
                                     ),

@@ -1,4 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
+import 'package:open_file/open_file.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter/material.dart';
 import 'package:bootstrap_alert/bootstrap_alert.dart';
@@ -69,4 +72,45 @@ String truncateFilename(String filename) {
   }
   // Truncate the filename and add "..."
   return filename.substring(0, 32) + " ...";
+}
+
+void handlePreviewFile(context, file) async {
+  try {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return Center(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Loader(size: 45, color: Colors.deepPurple),
+                  SizedBox(height: 20),
+                  Text(
+                    'Setting up things for you... Please wait.',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+    final downloadedFile = await FirebaseAuthService()
+        .downloadFilePrivately(file['name'], file['fullPath']);
+    Navigator.of(context).pop();
+    if (downloadedFile == null) return;
+    OpenFile.open(downloadedFile);
+  } catch (e) {
+    print('Error downloading file: $e');
+    throw e;
+  }
 }
