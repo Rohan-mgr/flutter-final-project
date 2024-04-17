@@ -87,7 +87,9 @@ class _NotesState extends State<Notes> {
         'ppt',
         'pptx',
         'jpeg',
-        'txt'
+        'txt',
+        'mp3',
+        'mp4'
       ],
     );
 
@@ -261,8 +263,9 @@ class _NotesState extends State<Notes> {
                                     // padding: EdgeInsets.all(0),
                                     margin: EdgeInsets.only(
                                         left: 5, right: 5, top: 2, bottom: 2),
-                                    color: Color.fromARGB(255, 240, 238, 247),
+                                    color: Color.fromRGBO(240, 238, 247, 1),
                                     child: ListTile(
+                                      contentPadding: EdgeInsets.only(left: 5),
                                       title: Row(
                                         children: [
                                           (item['type'] == 'folder')
@@ -363,6 +366,7 @@ class _NotesState extends State<Notes> {
                                           setState(() {});
                                         } else {
                                           // Handle file tap
+                                          handlePreviewFile(context, item);
                                         }
                                       },
                                     ),

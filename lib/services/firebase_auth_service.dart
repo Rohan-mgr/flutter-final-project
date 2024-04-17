@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
 import "dart:io";
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:dio/dio.dart';
 
 class FirebaseAuthService {
   // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -45,6 +49,56 @@ class FirebaseAuthService {
     } catch (e) {
       print('Error deleting file: $e');
       return false;
+    }
+  }
+
+  Future<String?> getFileDownloadUrl(String filePath) async {
+    try {
+      final fileUrl = await storage.ref().child(filePath).getDownloadURL();
+      print('fileUrl => $fileUrl');
+      return fileUrl;
+    } catch (e) {
+      print('Error getting download URL: $e');
+      return null;
+    }
+  }
+
+  Future<String?> downloadFilePrivately(
+      String fileName, String filePath) async {
+    try {
+      final fileUrl = await getFileDownloadUrl(filePath);
+      print('fileUrl download privately => $fileUrl');
+
+      var storePath = await DirectoryPath().getPath();
+      var path = '$storePath/$fileName';
+
+      bool isFileExists = await File(path).exists();
+
+      if (!isFileExists) {
+        print("Downloading file...");
+        await Dio().download(fileUrl!, path);
+      }
+
+      return path;
+    } catch (e) {
+      print('Error downloading file privately: $e');
+      return null;
+    }
+  }
+
+  Future<void> downloadFile(String fileName, String filePath) async {
+    final storageRef = storage.ref(filePath);
+
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String appDocPath = appDocDir.path;
+    final File tempFile = File(appDocPath + '/' + fileName);
+    try {
+      await storageRef.writeToFile(tempFile);
+      await tempFile.create();
+      print('tempFile path => ${tempFile.path}');
+      await OpenFile.open(tempFile.path);
+    } on FirebaseException catch (e) {
+      print('Error downloading File => $e');
     }
   }
 
