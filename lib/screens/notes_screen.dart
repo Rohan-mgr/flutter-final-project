@@ -253,7 +253,7 @@ class _NotesState extends State<Notes> {
                       ),
                     ),
                   )
-                : Center(
+                : Expanded(
                     child: folders.length != 0
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
