@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
@@ -37,6 +38,7 @@ class _ModalState extends State<Modal> {
           MaterialPageRoute(
             builder: (context) => Home(
               initialBreadCrumbs: widget.breadCrumbs,
+              bottomNavigationIndex: getSeletedTabIndex(widget.breadCrumbs[0]),
             ),
           ),
         );

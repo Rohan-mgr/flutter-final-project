@@ -10,14 +10,15 @@ import 'package:flutter_final_project/screens/verify_otp.dart';
 
 // Define the routes as a Map
 Map<String, Widget Function(BuildContext)> get appRoutes => {
-      '/home': (context) => Home(),
+      '/home': (context) => Home(
+            initialBreadCrumbs: [],
+            bottomNavigationIndex: 0,
+          ),
       '/': (context) => Login(),
       "/signup": (context) => SignUp(),
       "/forgot-password": (context) => ForgotPassword(),
 
       // "/notes": (context) => Notes(),
-      "/new-password":(context) => NewPassword(),
+      "/new-password": (context) => NewPassword(),
       "/verify-otp": (context) => VerifyOtp(),
-
-
     };

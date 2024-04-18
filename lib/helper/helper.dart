@@ -67,11 +67,11 @@ BootstrapAlert Alert(BuildContext context, String errMsg, ToastStatus status) {
 }
 
 String truncateFilename(String filename) {
-  if (filename.length <= 32) {
+  if (filename.length <= 29) {
     return filename;
   }
   // Truncate the filename and add "..."
-  return filename.substring(0, 32) + " ...";
+  return filename.substring(0, 29) + " ...";
 }
 
 void handlePreviewFile(context, file) async {
@@ -112,5 +112,76 @@ void handlePreviewFile(context, file) async {
   } catch (e) {
     print('Error downloading file: $e');
     throw e;
+  }
+}
+
+Widget getCustomIcon(String extension) {
+  switch (extension.toLowerCase()) {
+    case 'mp3':
+      return const Image(
+        image: AssetImage('assets/mp3-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+      return const Image(
+        image: AssetImage('assets/img-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    case 'doc':
+    case 'docx':
+      return const Image(
+        image: AssetImage('assets/doc-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    case 'pdf':
+      return const Image(
+        image: AssetImage('assets/pdf-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    case 'txt':
+      return const Image(
+        image: AssetImage('assets/txt-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    case 'mp4':
+      return const Image(
+        image: AssetImage('assets/mp4-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    case 'ppt':
+    case 'pptx':
+      return const Image(
+        image: AssetImage('assets/ppt-icon.png'),
+        width: 40,
+        height: 40,
+      );
+    default:
+      return const Icon(
+        Icons.insert_drive_file,
+        color: Colors.deepPurple,
+        size: 40,
+      );
+  }
+}
+
+int getSeletedTabIndex(String label) {
+  print("selected tab label => $label");
+  switch (label.toLowerCase()) {
+    case "notes":
+      return 0;
+    case 'questions':
+      return 1;
+    case 'blogs':
+      return 2;
+    default:
+      return 0;
   }
 }

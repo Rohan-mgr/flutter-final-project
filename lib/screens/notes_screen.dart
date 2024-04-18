@@ -8,7 +8,6 @@ import 'package:flutter_final_project/widgets/Modal.dart';
 import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 import 'package:file_picker/file_picker.dart';
 import "dart:io";
-
 import 'package:flutter_final_project/widgets/centraltextloader.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:flutter_final_project/widgets/popUpMenu.dart';
@@ -89,7 +88,8 @@ class _NotesState extends State<Notes> {
         'jpeg',
         'txt',
         'mp3',
-        'mp4'
+        'mp4',
+        'png'
       ],
     );
 
@@ -152,6 +152,7 @@ class _NotesState extends State<Notes> {
           MaterialPageRoute(
             builder: (context) => Home(
               initialBreadCrumbs: breadCrumbs,
+              bottomNavigationIndex: getSeletedTabIndex(breadCrumbs[0]),
             ),
           ),
         );
@@ -278,15 +279,16 @@ class _NotesState extends State<Notes> {
                                                     size: 32,
                                                   ),
                                                 )
-                                              : Container(
-                                                  margin: EdgeInsets.only(
-                                                      right: 10),
-                                                  child: Icon(
-                                                    Icons.insert_drive_file,
-                                                    color: Colors.deepPurple,
-                                                    size: 32,
-                                                  ),
-                                                ),
+                                              : getCustomIcon(item['mimeType']),
+                                          // Container(
+                                          //     margin: EdgeInsets.only(
+                                          //         right: 10),
+                                          //     child: Icon(
+                                          //       Icons.insert_drive_file,
+                                          //       color: Colors.deepPurple,
+                                          //       size: 32,
+                                          //     ),
+                                          //   ),
                                           Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,

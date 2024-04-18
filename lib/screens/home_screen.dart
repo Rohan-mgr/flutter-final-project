@@ -5,19 +5,21 @@ import 'package:flutter_final_project/screens/questions_screen.dart';
 
 class Home extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
-  const Home({super.key, this.initialBreadCrumbs});
+  final int? bottomNavigationIndex;
+  const Home({super.key, this.initialBreadCrumbs, this.bottomNavigationIndex});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  int _currentPageIndex = 0;
+  int? _currentPageIndex = 0;
   List<String> breadCrumbs = [];
 
   @override
   void initState() {
     super.initState();
+    _currentPageIndex = widget.bottomNavigationIndex;
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
     }
@@ -34,7 +36,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
       Notes(initialBreadCrumbs: breadCrumbs),
-      Questions(),
+      Questions(initialBreadCrumbs: breadCrumbs),
       Blogs()
     ];
 
@@ -42,11 +44,11 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text("We Share"),
       ),
-      body: Center(child: _widgetOptions.elementAt(_currentPageIndex)),
+      body: Center(child: _widgetOptions.elementAt(_currentPageIndex!)),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: _onItemTapped,
         indicatorColor: Colors.deepPurple,
-        selectedIndex: _currentPageIndex,
+        selectedIndex: _currentPageIndex!,
         destinations: const <Widget>[
           NavigationDestination(
             selectedIcon: Icon(

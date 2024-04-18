@@ -1,10 +1,15 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
-import 'package:open_file/open_file.dart';
+import 'package:uuid/uuid.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 class PopUpMenu extends StatefulWidget {
   final dynamic file;
@@ -16,6 +21,7 @@ class PopUpMenu extends StatefulWidget {
 }
 
 class _PopUpMenuState extends State<PopUpMenu> {
+  double downloadProgress = 0;
   @override
   Widget build(BuildContext context) {
     void removeFile(file) async {
@@ -59,6 +65,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
           MaterialPageRoute(
             builder: (context) => Home(
               initialBreadCrumbs: widget.breadCrumbs,
+              bottomNavigationIndex: getSeletedTabIndex(widget.breadCrumbs[0]),
             ),
           ),
         );
@@ -123,54 +130,31 @@ class _PopUpMenuState extends State<PopUpMenu> {
           });
     }
 
-    // void handlePreviewFile(file) async {
-    //   try {
-    //     showDialog(
-    //         context: context,
-    //         barrierDismissible: false,
-    //         builder: (context) {
-    //           return Center(
-    //             child: Container(
-    //               margin: EdgeInsets.symmetric(horizontal: 20),
-    //               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-    //               decoration: BoxDecoration(
-    //                 color: Colors.white,
-    //                 borderRadius: BorderRadius.circular(20.0),
-    //               ),
-    //               child: Column(
-    //                 mainAxisSize: MainAxisSize.min,
-    //                 children: [
-    //                   Loader(size: 45, color: Colors.deepPurple),
-    //                   SizedBox(height: 20),
-    //                   Text(
-    //                     'Setting up things for you... Please wait.',
-    //                     style: TextStyle(
-    //                       fontSize: 16,
-    //                     ),
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //           );
-    //         });
-    //     final downloadedFile = await FirebaseAuthService()
-    //         .downloadFilePrivately(file['name'], file['fullPath']);
-    //     Navigator.of(context).pop();
-    //     if (downloadedFile == null) return;
-    //     OpenFile.open(downloadedFile);
-    //   } catch (e) {
-    //     print('Error downloading file: $e');
-    //     throw e;
-    //   }
-    // }
-
-    void downloadFile(file) async {
+    Future<void> downloadFile(file) async {
       try {
-        await FirebaseAuthService()
-            .downloadFile(file['name'], file['fullPath']);
+        final fileUrl =
+            await FirebaseAuthService().getFileDownloadUrl(file['fullPath']);
+        var storePath = await ExternalPath.getExternalStoragePublicDirectory(
+            ExternalPath.DIRECTORY_DOWNLOADS);
+
+        var fileName = file['name'];
+        var extension = file['mimeType'] ?? 'ext'; // Handle missing extension
+        String path = '$storePath/${fileName}_${Uuid().v4()}.$extension';
+
+        print("Downloading file...");
+        await Dio().download(
+          fileUrl!,
+          path,
+          onReceiveProgress: (count, total) {
+            setState(() {
+              downloadProgress = count / total;
+            });
+          },
+        );
+        Navigator.of(context).pop();
       } catch (e) {
-        print('Error downloading file: $e');
-        throw e;
+        print('Error downloading file publicly: $e');
+        return null;
       }
     }
 
@@ -204,19 +188,43 @@ class _PopUpMenuState extends State<PopUpMenu> {
           icon: Icon(Icons.more_vert, color: Colors.deepPurple),
           onSelected: (value) {
             // Handle menu item selection (optional)
-            if (value == 4) {
-              handleRemoveBtnClick(widget.file);
-            } else if (value == 1) {
+            print('value => $value');
+            if (value == 1) {
               handlePreviewFile(context, widget.file);
             } else if (value == 2) {
               copyLinkToClipboard(widget.file);
             } else if (value == 3) {
-              try {
-                downloadFile(widget.file);
-              } catch (e) {
-                print('Error downloading file: $e');
-                throw e;
-              }
+              print('progress: $downloadProgress');
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return StatefulBuilder(
+                    builder: (context, setState) => Center(
+                      child: Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            new CircularPercentIndicator(
+                              radius: 50.0,
+                              lineWidth: 10.0,
+                              percent: downloadProgress / 100,
+                              center: Text('$downloadProgress %'),
+                              backgroundColor: Colors.grey,
+                              progressColor: Colors.blue,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+              downloadFile(widget.file);
+            } else if (value == 4) {
+              handleRemoveBtnClick(widget.file);
             }
           },
           itemBuilder: (context) => [
