@@ -178,6 +178,7 @@ class _NotesState extends State<Notes> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Text("Welcome, ${user?.firstName} ${user?.lastName}"),

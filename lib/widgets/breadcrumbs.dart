@@ -9,30 +9,37 @@ class Breadcrumbs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Row(
+    return Container(
+      child: Wrap(
+        runSpacing: -20,
+        spacing: -10,
+        alignment: WrapAlignment.start,
+        direction: Axis.horizontal,
         children: [
-          Icon(
-            Icons.home,
-            color: Colors.deepPurple,
-          ),
-          for (int i = 0; i < breadCrumbs.length; i++)
-            Row(
+          Container(
+            height: 48,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  onPressed: () => onBreadcrumbTap(i),
-                  child: Text(
-                    breadCrumbs[i],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                Icon(
+                  Icons.home,
+                  color: Colors.deepPurple,
                 ),
-                if (i < breadCrumbs.length - 1) Icon(Icons.chevron_right),
               ],
             ),
+          ),
+          for (int i = 0; i < breadCrumbs.length; i++)
+            TextButton(
+              onPressed: () => onBreadcrumbTap(i),
+              child: Text(
+                breadCrumbs[i] + "${i < breadCrumbs.length - 1 ? "   >" : ""}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          // if (i < breadCrumbs.length - 1) Icon(Icons.chevron_right)
         ],
       ),
     );
