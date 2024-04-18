@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +7,6 @@ import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:uuid/uuid.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 
 class PopUpMenu extends StatefulWidget {
   final dynamic file;
@@ -44,13 +41,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
                     children: [
                       Loader(size: 30, color: Colors.red),
                       SizedBox(height: 20),
-                      Text(
-                        'Removing file... Please wait.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text('Removing file... Please wait.'),
                     ],
                   ),
                 ),
@@ -132,6 +123,29 @@ class _PopUpMenuState extends State<PopUpMenu> {
 
     Future<void> downloadFile(file) async {
       try {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return Center(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Loader(size: 40, color: Colors.deepPurple),
+                      SizedBox(height: 20),
+                      Text('Downloading file... Please wait.'),
+                    ],
+                  ),
+                ),
+              );
+            });
         final fileUrl =
             await FirebaseAuthService().getFileDownloadUrl(file['fullPath']);
         var storePath = await ExternalPath.getExternalStoragePublicDirectory(
@@ -152,6 +166,22 @@ class _PopUpMenuState extends State<PopUpMenu> {
           },
         );
         Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.download_done_outlined,
+                  color: Colors.white,
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text('File downloaded successfully'),
+              ],
+            ),
+          ),
+        );
       } catch (e) {
         print('Error downloading file publicly: $e');
         return null;
@@ -194,34 +224,6 @@ class _PopUpMenuState extends State<PopUpMenu> {
             } else if (value == 2) {
               copyLinkToClipboard(widget.file);
             } else if (value == 3) {
-              print('progress: $downloadProgress');
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return StatefulBuilder(
-                    builder: (context, setState) => Center(
-                      child: Container(
-                        color: Colors.white,
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            new CircularPercentIndicator(
-                              radius: 50.0,
-                              lineWidth: 10.0,
-                              percent: downloadProgress / 100,
-                              center: Text('$downloadProgress %'),
-                              backgroundColor: Colors.grey,
-                              progressColor: Colors.blue,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
               downloadFile(widget.file);
             } else if (value == 4) {
               handleRemoveBtnClick(widget.file);

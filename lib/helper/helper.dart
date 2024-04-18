@@ -93,12 +93,7 @@ void handlePreviewFile(context, file) async {
                 children: [
                   Loader(size: 45, color: Colors.deepPurple),
                   SizedBox(height: 20),
-                  Text(
-                    'Setting up things for you... Please wait.',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
+                  Text('Setting up things for you... Please wait.'),
                 ],
               ),
             ),
