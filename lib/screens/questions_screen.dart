@@ -164,7 +164,7 @@ class _QuestionsState extends State<Questions> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: EdgeInsets.all(15),
+              padding: EdgeInsets.only(top: 15, bottom: 0, left: 15, right: 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -226,7 +226,7 @@ class _QuestionsState extends State<Questions> {
                       ),
                     ),
                   )
-                : Center(
+                : Expanded(
                     child: folders.length != 0
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
@@ -344,7 +344,13 @@ class _QuestionsState extends State<Questions> {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             physics: ClampingScrollPhysics())
-                        : Text("There is no files here yet")),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("There is no files here yet"),
+                            ],
+                          )),
           ],
         ),
       ),

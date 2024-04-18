@@ -164,7 +164,7 @@ class _NotesState extends State<Notes> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: EdgeInsets.only(top: 15, bottom: 5, left: 15, right: 15),
+              padding: EdgeInsets.only(top: 15, bottom: 0, left: 15, right: 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -353,7 +353,14 @@ class _NotesState extends State<Notes> {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             physics: ClampingScrollPhysics())
-                        : Text("There is no files here yet")),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("There is no files here yet"),
+                            ],
+                          ),
+                  ),
           ],
         ),
       ),
