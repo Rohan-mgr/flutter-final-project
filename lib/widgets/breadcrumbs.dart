@@ -10,6 +10,7 @@ class Breadcrumbs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(left: 5),
       child: Wrap(
         runSpacing: -20,
         spacing: -10,

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
-import 'package:flutter_final_project/helper/storage.dart';
-import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/Modal.dart';
 import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 import 'package:file_picker/file_picker.dart';
@@ -21,7 +19,6 @@ class Questions extends StatefulWidget {
 }
 
 class _QuestionsState extends State<Questions> {
-  MyUser? user;
   List<dynamic> folders = [];
   List<String> breadCrumbs = [];
   bool _isLoading = false;
@@ -29,7 +26,6 @@ class _QuestionsState extends State<Questions> {
   @override
   void initState() {
     super.initState();
-    loadUserFromLocalStorage();
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
     }
@@ -58,19 +54,6 @@ class _QuestionsState extends State<Questions> {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> loadUserFromLocalStorage() async {
-    try {
-      final loggedUser = await Storage.getUser("user");
-      if (loggedUser != null) {
-        setState(() {
-          user = loggedUser;
-        });
-      }
-    } catch (error) {
-      print('Error retrieving user: $error');
     }
   }
 
@@ -180,19 +163,8 @@ class _QuestionsState extends State<Questions> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Text("Welcome, ${user?.firstName} ${user?.lastName}"),
-            ),
-            Center(
-              child: ElevatedButton(
-                  onPressed: () async {
-                    await Storage.remove('user');
-                    Navigator.popAndPushNamed(context, "/");
-                  },
-                  child: Text("Logout")),
-            ),
             Container(
-              padding: EdgeInsets.all(15),
+              padding: EdgeInsets.only(top: 15, bottom: 0, left: 15, right: 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -254,7 +226,7 @@ class _QuestionsState extends State<Questions> {
                       ),
                     ),
                   )
-                : Center(
+                : Expanded(
                     child: folders.length != 0
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
@@ -281,15 +253,6 @@ class _QuestionsState extends State<Questions> {
                                                   ),
                                                 )
                                               : getCustomIcon(item['mimeType']),
-                                          // Container(
-                                          //     margin: EdgeInsets.only(
-                                          //         right: 10),
-                                          //     child: Icon(
-                                          //       Icons.insert_drive_file,
-                                          //       color: Colors.deepPurple,
-                                          //       size: 32,
-                                          //     ),
-                                          //   ),
                                           Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -381,7 +344,13 @@ class _QuestionsState extends State<Questions> {
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             physics: ClampingScrollPhysics())
-                        : Text("There is no files here yet")),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("There is no files here yet"),
+                            ],
+                          )),
           ],
         ),
       ),

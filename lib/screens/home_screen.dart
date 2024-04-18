@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/screens/blogs_screen.dart';
 import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
+import 'package:flutter_final_project/types/user.dart';
 
 class Home extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
@@ -13,15 +15,31 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  MyUser? user;
   int? _currentPageIndex = 0;
   List<String> breadCrumbs = [];
 
   @override
   void initState() {
     super.initState();
+    loadUserFromLocalStorage();
+
     _currentPageIndex = widget.bottomNavigationIndex;
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
+    }
+  }
+
+  Future<void> loadUserFromLocalStorage() async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          user = loggedUser;
+        });
+      }
+    } catch (error) {
+      print('Error retrieving user: $error');
     }
   }
 
@@ -41,10 +59,78 @@ class _HomeState extends State<Home> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("We Share"),
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              height: 130,
+              padding:
+                  EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 30),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(25.0),
+                  bottomRight: Radius.circular(25.0),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.account_circle_rounded,
+                          color: Colors.white,
+                          size: 60,
+                        ),
+                        SizedBox(width: 5),
+                        Container(
+                          margin: EdgeInsets.only(top: 7),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Welcome, ",
+                                  style: TextStyle(color: Colors.white)),
+                              Text('${user?.firstName} ${user?.lastName}',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ]),
+                  OutlinedButton(
+                    onPressed: () async {
+                      await Storage.remove('user');
+                      Navigator.popAndPushNamed(context, "/");
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: CircleBorder(),
+                      padding: EdgeInsets.all(10),
+                      side: BorderSide(
+                          color: Colors.white,
+                          width: 2), // Adjust width as needed
+                    ),
+                    child: Icon(
+                      Icons.logout,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+                child: Center(
+                    child: _widgetOptions.elementAt(_currentPageIndex!))),
+          ],
+        ),
       ),
-      body: Center(child: _widgetOptions.elementAt(_currentPageIndex!)),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: _onItemTapped,
         indicatorColor: Colors.deepPurple,
