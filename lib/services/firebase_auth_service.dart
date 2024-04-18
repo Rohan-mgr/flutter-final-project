@@ -75,7 +75,7 @@ class FirebaseAuthService {
       bool isFileExists = await File(path).exists();
 
       if (!isFileExists) {
-        print("Downloading file...");
+        print("preparing file...");
         await Dio().download(fileUrl!, path);
       }
 
