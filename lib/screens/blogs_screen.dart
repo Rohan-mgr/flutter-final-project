@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/widgets/blogcard.dart';
 
 class Blogs extends StatefulWidget {
   const Blogs({super.key});
@@ -11,9 +12,7 @@ class _BlogsState extends State<Blogs> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text("This is a Blogs Tab"),
-      ),
+      body: BlogCard(),
     );
   }
 }
