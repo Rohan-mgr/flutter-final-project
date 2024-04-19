@@ -3,8 +3,10 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_final_project/helper/helper.dart';
+import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,9 +20,30 @@ class PopUpMenu extends StatefulWidget {
 }
 
 class _PopUpMenuState extends State<PopUpMenu> {
+  MyUser? user;
+  @override
+  initState() {
+    super.initState();
+    loadUserFromLocalStorage();
+  }
+
+  Future<void> loadUserFromLocalStorage() async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          user = loggedUser;
+        });
+      }
+    } catch (error) {
+      print('Error retrieving user: $error');
+    }
+  }
+
   double downloadProgress = 0;
   @override
   Widget build(BuildContext context) {
+    print("users => ${user?.isAdmin}");
     void removeFile(file) async {
       try {
         // Show loading dialog
@@ -270,24 +293,25 @@ class _PopUpMenuState extends State<PopUpMenu> {
                 ],
               ),
             ),
-            PopupMenuItem(
-              value: 4,
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(
-                      Icons.delete_outline,
-                      color: Colors.red[400],
+            if (user!.isAdmin)
+              PopupMenuItem(
+                value: 4,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: Colors.red[400],
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Remove',
-                    style: TextStyle(color: Colors.red[400]),
-                  ),
-                ],
+                    Text(
+                      'Remove',
+                      style: TextStyle(color: Colors.red[400]),
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
           offset: Offset(-35.0, 0.0), // Adjust offset for left positioning
         ),
