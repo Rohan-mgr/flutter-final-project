@@ -210,6 +210,7 @@ class FirebaseAuthService {
         'lastName': lastName,
         'email': email,
         'password': hashedPassword,
+        'isAdmin': false,
       };
 
       DocumentReference doc = await db.collection("users").add(user);
@@ -241,6 +242,7 @@ class FirebaseAuthService {
         firstName: userData['firstName'],
         lastName: userData['lastName'],
         email: userData['email'],
+        isAdmin: userData['isAdmin'] ?? false,
       );
     } catch (e) {
       print(e);
