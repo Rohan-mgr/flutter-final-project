@@ -10,7 +10,7 @@ class BlogCard extends StatelessWidget {
       children: [
         Card(
             margin: EdgeInsets.all(10),
-            // color: Colors.grey,
+            color: Colors.grey[200],
             child: Container(
               height: 150,
               padding: EdgeInsets.all(10),
@@ -85,6 +85,7 @@ class BlogCard extends StatelessWidget {
         Card(
             margin: EdgeInsets.all(10),
             // color: Colors.grey,
+            color: Colors.grey[200],
             child: Container(
               height: 150,
               padding: EdgeInsets.all(10),
@@ -159,6 +160,7 @@ class BlogCard extends StatelessWidget {
         Card(
             margin: EdgeInsets.all(10),
             // color: Colors.grey,
+            color: Colors.grey[200],
             child: Container(
               height: 150,
               padding: EdgeInsets.all(10),
@@ -233,6 +235,7 @@ class BlogCard extends StatelessWidget {
         Card(
             margin: EdgeInsets.all(10),
             // color: Colors.grey,
+            color: Colors.grey[200],
             child: Container(
               height: 150,
               padding: EdgeInsets.all(10),
@@ -307,6 +310,7 @@ class BlogCard extends StatelessWidget {
         Card(
             margin: EdgeInsets.all(10),
             // color: Colors.grey,
+            color: Colors.grey[200],
             child: Container(
               height: 150,
               padding: EdgeInsets.all(10),

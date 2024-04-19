@@ -13,6 +13,10 @@ class _BlogsState extends State<Blogs> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlogCard(),
+      floatingActionButton: ElevatedButton(
+        child: Icon(Icons.edit),
+        onPressed: () {},
+      ),
     );
   }
 }
