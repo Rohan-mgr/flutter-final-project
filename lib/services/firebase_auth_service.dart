@@ -177,6 +177,9 @@ class FirebaseAuthService {
     await uploadTask.whenComplete(() => print('Upload complete'));
   }
 
+  //to upload blog
+  Future<void> UploadBlog() async {}
+
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
     try {
       print('folder path => $folderPath');

@@ -15,7 +15,9 @@ class _BlogsState extends State<Blogs> {
       body: BlogCard(),
       floatingActionButton: ElevatedButton(
         child: Icon(Icons.edit),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, "/upload-blog");
+        },
       ),
     );
   }
