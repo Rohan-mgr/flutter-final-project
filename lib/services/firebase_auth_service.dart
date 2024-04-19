@@ -3,6 +3,7 @@ import 'package:external_path/external_path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
+import 'package:flutter_final_project/types/Blogs.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
@@ -178,7 +179,38 @@ class FirebaseAuthService {
   }
 
   //to upload blog
-  Future<void> UploadBlog() async {}
+  Future<void> uploadBlogToFirebase(
+      {required File filepath,
+      required String title,
+      required String content,
+      required String fileName}) async {
+    try {
+      final loggedInUser = (await Storage.getUser("user"))?.email;
+      const folderPath = "blogs";
+      final storageRef = storage.ref().child('$folderPath/$fileName');
+      String? downloadRef;
+
+      //uploading thumbnail to firebase
+      await storageRef.putFile(filepath);
+      downloadRef = await storageRef.getDownloadURL();
+
+      Blog blog = new Blog(
+        title: title,
+        content: content,
+        imgUrl: downloadRef,
+        user: loggedInUser!,
+      );
+      //upload to blog
+      DocumentReference doc = await db.collection("blogs").add(blog.toJson());
+      print(doc.id);
+    } catch (error) {
+      print(error);
+    }
+
+    //upload image
+    //get download link
+    //upload blog
+  }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
     try {

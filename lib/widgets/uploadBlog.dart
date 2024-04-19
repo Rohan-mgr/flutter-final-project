@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:form_validator/form_validator.dart';
+import 'package:flutter_final_project/services/firebase_auth_service.dart';
 
 class UploadBlog extends StatefulWidget {
   const UploadBlog({super.key});
@@ -15,9 +18,49 @@ class _UploadBlogState extends State<UploadBlog> {
 
   String title = "";
   String content = "";
+  File? filePath = null;
+  String? fileName = null;
+  bool isFileSelected = false;
 
-  void handleSubmit() {
-    print(titleController.value);
+  void handleSubmit() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        title = titleController.text;
+        content = contentController.text;
+      });
+
+      try {
+        await FirebaseAuthService().uploadBlogToFirebase(
+            filepath: filePath!,
+            title: title,
+            content: content,
+            fileName: fileName!);
+      } catch (err) {
+        print(err);
+      }
+    }
+  }
+
+  void ThumbnailPicker() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: [
+        "png",
+        "jpeg",
+        "jpg",
+      ]);
+      if (result == null) return;
+      File file = File(result.files.single.path!);
+
+      setState(() {
+        filePath = file;
+        isFileSelected = true;
+        fileName = result.files.single.name;
+      });
+      print(filePath);
+    } catch (error) {
+      print(error);
+    }
   }
 
   @override
@@ -51,6 +94,7 @@ class _UploadBlogState extends State<UploadBlog> {
                       controller: titleController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(), labelText: "Title*"),
+                      validator: ValidationBuilder().required().build(),
                     ),
                     SizedBox(
                       height: 40,
@@ -64,28 +108,59 @@ class _UploadBlogState extends State<UploadBlog> {
                         SizedBox(
                           width: 20,
                         ),
-                        OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            // backgroundColor: Colors.deepPurple,
-                            // foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          onPressed: () {},
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.upload_sharp,
-                                size: 20,
-                                color: Colors.white,
+                        isFileSelected
+                            ? Expanded(
+                                child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    backgroundColor: Colors.red[500],
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      isFileSelected = false;
+                                      filePath = null;
+                                    });
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          fileName!,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Icon(Icons.backspace_sharp)
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  backgroundColor: Colors.deepPurple,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                onPressed: ThumbnailPicker,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.upload_sharp,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text("Upload Thumbnail"),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(width: 5),
-                              Text("Upload Thumbnail"),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                     SizedBox(
@@ -96,6 +171,7 @@ class _UploadBlogState extends State<UploadBlog> {
                       maxLines: null,
                       minLines: 10,
                       controller: contentController,
+                      validator: ValidationBuilder().required().build(),
                       decoration: InputDecoration(
                           border: OutlineInputBorder(), labelText: "Content*"),
                     ),
