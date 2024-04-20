@@ -130,7 +130,7 @@ class _QuestionsState extends State<Questions> {
       if (allUploadsSuccessful) {
         // All files uploaded successfully, navigate to Home route
         Navigator.pop(context);
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => Home(
@@ -138,6 +138,7 @@ class _QuestionsState extends State<Questions> {
               bottomNavigationIndex: getSeletedTabIndex(breadCrumbs[0]),
             ),
           ),
+          (Route<dynamic> route) => false,
         );
       } else {
         // Inform the user about upload failures
