@@ -166,7 +166,7 @@ class _SignUpState extends State<SignUp> {
 
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
@@ -190,7 +190,7 @@ class _SignUpState extends State<SignUp> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.blue),
+                          color: Colors.deepPurple),
                     ),
                   ),
                 ],

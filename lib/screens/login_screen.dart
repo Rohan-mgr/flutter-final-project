@@ -138,7 +138,7 @@ class _LoginState extends State<Login> {
               const SizedBox(height: 10.0),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
@@ -162,7 +162,7 @@ class _LoginState extends State<Login> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.blue),
+                          color: Colors.deepPurple),
                     ),
                   ),
                 ],
