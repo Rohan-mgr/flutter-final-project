@@ -16,6 +16,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   MyUser? user;
   bool _isLoading = false;
+  int downloadCount = 0;
   List<dynamic> favourites = [];
 
   @override
@@ -33,6 +34,7 @@ class _ProfileState extends State<Profile> {
           user = loggedUser;
         });
         await getFavoritesList();
+        await getDownloadCount();
       }
     } catch (error) {
       print('Error retrieving user: $error');
@@ -54,6 +56,26 @@ class _ProfileState extends State<Profile> {
       });
     } catch (e) {
       print('Error getting favorites: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> getDownloadCount() async {
+    if (user == null) return;
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final userDownloadCount =
+          await FirebaseAuthService().getUserDownloadCount(user?.id);
+      setState(() {
+        downloadCount = userDownloadCount;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error getting download count: $e');
       setState(() {
         _isLoading = false;
       });
@@ -188,13 +210,23 @@ class _ProfileState extends State<Profile> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      '33',
-                                      style: TextStyle(
-                                          color: Colors.deepPurple,
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                                    _isLoading
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 15.0),
+                                            child: Center(
+                                                child: Loader(
+                                              size: 25,
+                                              color: Colors.deepPurple,
+                                            )),
+                                          )
+                                        : Text(
+                                            downloadCount.toString(),
+                                            style: TextStyle(
+                                                color: Colors.deepPurple,
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.bold),
+                                          ),
                                     Text(
                                       "Downloads",
                                     )

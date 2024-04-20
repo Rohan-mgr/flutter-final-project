@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_final_project/helper/helper.dart';
@@ -8,7 +6,6 @@ import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
-import 'package:uuid/uuid.dart';
 
 class PopUpMenu extends StatefulWidget {
   final dynamic file;
@@ -45,7 +42,6 @@ class _PopUpMenuState extends State<PopUpMenu> {
     }
   }
 
-  double downloadProgress = 0;
   @override
   Widget build(BuildContext context) {
     void removeFile(file) async {
@@ -148,7 +144,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
           });
     }
 
-    Future<void> downloadFile(file) async {
+    Future<bool> downloadFile(file) async {
       try {
         showDialog(
             context: context,
@@ -173,26 +169,10 @@ class _PopUpMenuState extends State<PopUpMenu> {
                 ),
               );
             });
-        final fileUrl =
-            await FirebaseAuthService().getFileDownloadUrl(file['fullPath']);
-        var storePath = await ExternalPath.getExternalStoragePublicDirectory(
-            ExternalPath.DIRECTORY_DOWNLOADS);
 
-        var fileName = file['name'];
-        var extension = file['mimeType'] ?? 'ext'; // Handle missing extension
-        String path = '$storePath/${fileName}_${Uuid().v4()}.$extension';
+        await FirebaseAuthService().downloadFilePublicly(user?.id, file);
 
-        print("Downloading file...");
-        await Dio().download(
-          fileUrl!,
-          path,
-          onReceiveProgress: (count, total) {
-            setState(() {
-              downloadProgress = count / total;
-            });
-          },
-        );
-        Navigator.of(context).pop();
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -209,9 +189,10 @@ class _PopUpMenuState extends State<PopUpMenu> {
             ),
           ),
         );
+        return true;
       } catch (e) {
         print('Error downloading file publicly: $e');
-        return null;
+        return false;
       }
     }
 
@@ -347,7 +328,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
       children: [
         PopupMenuButton<int>(
           icon: Icon(Icons.more_vert, color: Colors.deepPurple),
-          onSelected: (value) {
+          onSelected: (value) async {
             // Handle menu item selection (optional)
             print('value => $value');
             if (value == 1) {
@@ -355,7 +336,18 @@ class _PopUpMenuState extends State<PopUpMenu> {
             } else if (value == 2) {
               copyLinkToClipboard(widget.file);
             } else if (value == 3) {
-              downloadFile(widget.file);
+              final bool response = await downloadFile(widget.file);
+              if (response && widget.isProfileSection) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Home(
+                      initialBreadCrumbs: [],
+                      bottomNavigationIndex: getSeletedTabIndex('profile'),
+                    ),
+                  ),
+                );
+              }
             } else if (value == 4) {
               handleRemoveBtnClick(widget.file);
             } else if (value == 5) {
