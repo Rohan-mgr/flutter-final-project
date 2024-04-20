@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:external_path/external_path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
@@ -10,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 
 class FirebaseAuthService {
   // final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -63,6 +65,65 @@ class FirebaseAuthService {
     }
   }
 
+  Future<int> getUserDownloadCount(String? userId) async {
+    try {
+      final docRef = db.collection('users').doc(userId);
+      final docSnapshot = await docRef.get();
+      if (docSnapshot.exists) {
+        return docSnapshot.data()!['downloads'] ?? 0;
+      } else {
+        print('User document not found');
+        return 0; // Handle user not found case (optional)
+      }
+    } catch (e) {
+      print('Error getting download count: $e');
+      return 0; // Handle errors (optional)
+    }
+  }
+
+  Future<void> updateDownloadCount(String? userId) async {
+    try {
+      final docRef = db.collection('users').doc(userId);
+      final docSnapshot = await docRef.get();
+      if (docSnapshot.exists) {
+        final currentDownloads = docSnapshot.data()!['downloads'] ?? 0;
+        await docRef.update({'downloads': currentDownloads + 1});
+      } else {
+        print('User document not found');
+      }
+    } catch (e) {
+      print('Error updating download count: $e');
+    }
+  }
+
+  // downloading file in the user device
+  Future<void> downloadFilePublicly(String? userId, file) async {
+    try {
+      final fileUrl = await getFileDownloadUrl(file['fullPath']);
+      var storePath = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
+
+      var fileName = file['name'];
+      var extension = file['mimeType'] ?? 'ext'; // Handle missing extension
+      String path = '$storePath/${fileName}_${Uuid().v4()}.$extension';
+
+      print("Downloading file...");
+      await Dio().download(
+        fileUrl!,
+        path,
+      );
+
+      // Update user download count
+      if (userId != null) {
+        await updateDownloadCount(userId);
+      }
+    } catch (e) {
+      print("Error downloading file publicly: $e");
+      return null;
+    }
+  }
+
+  // downloading file privately for previewing
   Future<String?> downloadFilePrivately(
       String fileName, String filePath) async {
     try {
@@ -83,22 +144,6 @@ class FirebaseAuthService {
     } catch (e) {
       print('Error downloading file privately: $e');
       return null;
-    }
-  }
-
-  Future<void> downloadFile(String fileName, String filePath) async {
-    final storageRef = storage.ref(filePath);
-
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final String appDocPath = appDocDir.path;
-    final File tempFile = File(appDocPath + '/' + fileName);
-    try {
-      await storageRef.writeToFile(tempFile);
-      await tempFile.create();
-      print('tempFile path => ${tempFile.path}');
-      await OpenFile.open(tempFile.path);
-    } on FirebaseException catch (e) {
-      print('Error downloading File => $e');
     }
   }
 
