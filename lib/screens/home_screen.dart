@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/screens/blogs_screen.dart';
 import 'package:flutter_final_project/screens/notes_screen.dart';
+import 'package:flutter_final_project/screens/profile_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
 import 'package:flutter_final_project/types/user.dart';
 
@@ -55,7 +56,8 @@ class _HomeState extends State<Home> {
     List<Widget> _widgetOptions = <Widget>[
       Notes(initialBreadCrumbs: breadCrumbs),
       Questions(initialBreadCrumbs: breadCrumbs),
-      Blogs()
+      Blogs(),
+      Profile(),
     ];
 
     return Scaffold(
@@ -63,68 +65,69 @@ class _HomeState extends State<Home> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
-              height: 130,
-              padding:
-                  EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 30),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(25.0),
-                  bottomRight: Radius.circular(25.0),
+            if (_currentPageIndex != 3)
+              Container(
+                height: 130,
+                padding: EdgeInsetsDirectional.symmetric(
+                    horizontal: 10, vertical: 30),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(25.0),
+                    bottomRight: Radius.circular(25.0),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.account_circle_rounded,
+                            color: Colors.white,
+                            size: 60,
+                          ),
+                          SizedBox(width: 5),
+                          Container(
+                            margin: EdgeInsets.only(top: 7),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Welcome, ",
+                                    style: TextStyle(color: Colors.white)),
+                                Text('${user?.firstName} ${user?.lastName}',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ]),
+                    OutlinedButton(
+                      onPressed: () async {
+                        await Storage.remove('user');
+                        Navigator.popAndPushNamed(context, "/");
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(10),
+                        side: BorderSide(
+                            color: Colors.white,
+                            width: 2), // Adjust width as needed
+                      ),
+                      child: Icon(
+                        Icons.logout,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                    )
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.account_circle_rounded,
-                          color: Colors.white,
-                          size: 60,
-                        ),
-                        SizedBox(width: 5),
-                        Container(
-                          margin: EdgeInsets.only(top: 7),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Welcome, ",
-                                  style: TextStyle(color: Colors.white)),
-                              Text('${user?.firstName} ${user?.lastName}',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ]),
-                  OutlinedButton(
-                    onPressed: () async {
-                      await Storage.remove('user');
-                      Navigator.popAndPushNamed(context, "/");
-                    },
-                    style: OutlinedButton.styleFrom(
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(10),
-                      side: BorderSide(
-                          color: Colors.white,
-                          width: 2), // Adjust width as needed
-                    ),
-                    child: Icon(
-                      Icons.logout,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                  )
-                ],
-              ),
-            ),
             Expanded(
                 child: Center(
                     child: _widgetOptions.elementAt(_currentPageIndex!))),
@@ -171,6 +174,18 @@ class _HomeState extends State<Home> {
               size: 27,
             ),
             label: 'Blogs',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(
+              Icons.account_circle_rounded,
+              size: 27,
+              color: Colors.white,
+            ),
+            icon: Icon(
+              Icons.account_circle_rounded,
+              size: 27,
+            ),
+            label: 'Profile',
           ),
         ],
       ),

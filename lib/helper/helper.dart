@@ -176,6 +176,8 @@ int getSeletedTabIndex(String label) {
       return 1;
     case 'blogs':
       return 2;
+    case 'profile':
+      return 3;
     default:
       return 0;
   }

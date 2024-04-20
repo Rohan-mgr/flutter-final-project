@@ -191,14 +191,74 @@ class FirebaseAuthService {
     }
   }
 
+  Future<void> removeFilesFromFavouriteList(String documentId) async {
+    try {
+      await db.collection('favourites').doc(documentId).delete();
+      print('File removed from favourite list successfully');
+    } catch (e) {
+      print('Error removing file from favourite list: $e');
+      throw e;
+    }
+  }
+
+  Future<List<dynamic>> listFavouriteFiles(String? userId) async {
+    try {
+      final favouriteFiles = await db
+          .collection('favourites')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      List<dynamic> files = [];
+      favouriteFiles.docs.forEach((file) {
+        final data = file.data();
+        data['documentId'] = file.id;
+        files.add(data);
+        print("data => $data");
+      });
+
+      return files;
+    } catch (e) {
+      print('Error listing favourite files: $e');
+      throw e;
+    }
+  }
+
+  Future<void> addFileToFavouriteList(String? userId, file) async {
+    try {
+      final fileExits = await db
+          .collection('favourites')
+          .where('userId', isEqualTo: userId)
+          .where('name', isEqualTo: file?['name'])
+          .get();
+      if (fileExits.docs.isNotEmpty) {
+        throw "File already exists in favourite list";
+      }
+
+      final favouriteFile = <String, dynamic>{
+        'createdAt': file?['createdAt'],
+        'fullPath': file?['fullPath'],
+        'name': file?['name'],
+        'size': file?['fileSize'],
+        'uploadedBy': file?['uploadedBy'],
+        'mimeType': file?['mimeType'],
+        'userId': userId,
+      };
+
+      DocumentReference doc =
+          await db.collection("favourites").add(favouriteFile);
+      print('File added to favourite list successfully, ${doc.id}');
+    } catch (e) {
+      print('Error adding file to favourite list: $e');
+      throw e;
+    }
+  }
+
   Future<void> createUserWithEmailAndPassword(
       String firstName, String lastName, String email, String password) async {
     try {
       // Check if the email already exists
-      final emailExists = await FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: email)
-          .get();
+      final emailExists =
+          await db.collection('users').where('email', isEqualTo: email).get();
 
       if (emailExists.docs.isNotEmpty) {
         throw "Email address already exists";

@@ -13,8 +13,13 @@ import 'package:uuid/uuid.dart';
 class PopUpMenu extends StatefulWidget {
   final dynamic file;
   final List<String> breadCrumbs;
+  final bool isProfileSection;
 
-  const PopUpMenu({super.key, required this.file, required this.breadCrumbs});
+  const PopUpMenu(
+      {super.key,
+      required this.file,
+      required this.breadCrumbs,
+      this.isProfileSection = false});
   @override
   _PopUpMenuState createState() => _PopUpMenuState();
 }
@@ -43,7 +48,6 @@ class _PopUpMenuState extends State<PopUpMenu> {
   double downloadProgress = 0;
   @override
   Widget build(BuildContext context) {
-    print("users => ${user?.isAdmin}");
     void removeFile(file) async {
       try {
         // Show loading dialog
@@ -195,7 +199,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
               children: [
                 Icon(
                   Icons.download_done_outlined,
-                  color: Colors.white,
+                  color: Colors.green[400],
                 ),
                 SizedBox(
                   width: 10,
@@ -235,6 +239,110 @@ class _PopUpMenuState extends State<PopUpMenu> {
       );
     }
 
+    Future<void> handleAddToFavourite(file) async {
+      print("Adding to favourite...");
+      try {
+        await FirebaseAuthService().addFileToFavouriteList(user?.id, file);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.favorite,
+                  color: Colors.white,
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Text(
+                    'Added to favourite. Please visit your profile section',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.error,
+                  color: Colors.red,
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Text(e.toString()),
+                ),
+              ],
+            ),
+          ),
+        );
+        return null;
+      }
+    }
+
+    void handleRemoveFileFromFavouriteList(file) async {
+      print("file remove fav list => $file");
+      try {
+        await FirebaseAuthService()
+            .removeFilesFromFavouriteList(file?['documentId']);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Home(
+              initialBreadCrumbs: [],
+              bottomNavigationIndex: getSeletedTabIndex('profile'),
+            ),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.download_done_outlined,
+                  color: Colors.green[400],
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Text(
+                    'File removed from favourite list.',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.error,
+                  color: Colors.red,
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Text(e.toString()),
+                ),
+              ],
+            ),
+          ),
+        );
+        return null;
+      }
+    }
+
     return Row(
       children: [
         PopupMenuButton<int>(
@@ -250,6 +358,10 @@ class _PopUpMenuState extends State<PopUpMenu> {
               downloadFile(widget.file);
             } else if (value == 4) {
               handleRemoveBtnClick(widget.file);
+            } else if (value == 5) {
+              handleAddToFavourite(widget.file);
+            } else if (value == 6) {
+              handleRemoveFileFromFavouriteList(widget.file);
             }
           },
           itemBuilder: (context) => [
@@ -293,7 +405,39 @@ class _PopUpMenuState extends State<PopUpMenu> {
                 ],
               ),
             ),
-            if (user!.isAdmin)
+            if (!widget.isProfileSection)
+              PopupMenuItem(
+                value: 5,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(Icons.favorite_border_outlined),
+                    ),
+                    Text('Add to favourite'),
+                  ],
+                ),
+              ),
+            if (widget.isProfileSection)
+              PopupMenuItem(
+                value: 6,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.heart_broken_outlined,
+                        color: Colors.red[400],
+                      ),
+                    ),
+                    Text(
+                      'Remove from favourite',
+                      style: TextStyle(color: Colors.red[400]),
+                    ),
+                  ],
+                ),
+              ),
+            if (user!.isAdmin && !widget.isProfileSection)
               PopupMenuItem(
                 value: 4,
                 child: Row(
