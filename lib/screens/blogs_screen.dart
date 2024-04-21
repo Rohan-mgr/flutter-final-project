@@ -15,6 +15,7 @@ class Blogs extends StatefulWidget {
 class _BlogsState extends State<Blogs> {
   List<Map> data = [];
   bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -32,33 +33,40 @@ class _BlogsState extends State<Blogs> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading
-          ? Center(
-              child: Loader(
-                size: 30,
-                color: Colors.deepPurple,
-              ),
-            )
-          : Column(
-              children: [
-                Container(
-                    height: 600,
-                    child: ListView.builder(
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        return BlogCard(
-                          blogDetail: data[index],
-                        );
-                      },
-                    ))
-              ],
-            ),
-      floatingActionButton: ElevatedButton(
-        child: Icon(Icons.edit),
-        onPressed: () {
-          Navigator.pushNamed(context, "/upload-blog");
-        },
-      ),
-    );
+        body: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              _isLoading = true;
+            });
+            await loadBlogs();
+          },
+          child: _isLoading
+              ? Center(
+                  child: Loader(
+                    size: 30,
+                    color: Colors.deepPurple,
+                  ),
+                )
+              : Column(
+                  children: [
+                    Container(
+                        height: 600,
+                        child: ListView.builder(
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            return BlogCard(
+                              blogDetail: data[index],
+                            );
+                          },
+                        ))
+                  ],
+                ),
+        ),
+        floatingActionButton: ElevatedButton(
+          child: Icon(Icons.edit),
+          onPressed: () {
+            Navigator.pushNamed(context, "/upload-blog");
+          },
+        ));
   }
 }
