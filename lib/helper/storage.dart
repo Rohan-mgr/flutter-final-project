@@ -25,10 +25,15 @@ class Storage {
   static Future<MyUser?> getUser(String key) async {
     final encodedUser = await getString(key);
     if (encodedUser != null) {
-      final userMap = jsonDecode(encodedUser) as Map<String, dynamic>;
-      return MyUser.fromJson(userMap);
+      try {
+        final userMap = jsonDecode(encodedUser) as Map<String, dynamic>;
+        return MyUser.fromJson(userMap);
+      } on FormatException catch (e) {
+        print('Error decoding user data: $e');
+        return null; // Return null on decoding error
+      }
     }
-    return null;
+    return null; // Return null if encodedUser is null
   }
 
   // remove a specific key

@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/types/Blogs.dart';
+import 'package:flutter_final_project/types/profile.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
@@ -97,6 +98,60 @@ class FirebaseAuthService {
     }
   }
 
+  Future<void> deleteExistingProfileFromStorage(String fullPath) async {
+    try {
+      final storageRef = storage.ref().child(fullPath);
+      await storageRef.delete();
+      print('Existing image deleted from storage');
+    } catch (e) {
+      print('Error deleting image from storage: $e');
+    }
+  }
+
+  Future<MyUser?> updateUserProfilePicture(
+    String? userId,
+    UserProfile? userProfile,
+  ) async {
+    try {
+      final docRef = db.collection('users').doc(userId);
+      final docSnapshot = await docRef.get();
+      if (!docSnapshot.exists) {
+        print('User document not found');
+        return null;
+      }
+      final profileData = docSnapshot.data();
+      final existingProfile = profileData?['profile'] as Map<String, dynamic>?;
+
+      if (existingProfile == null) {
+        print('Profile object not found');
+        return null;
+      }
+      final existingFullPath = existingProfile['storageFullPath'] as String?;
+      if (existingFullPath != null &&
+          userProfile?.fullStoragePath != existingFullPath) {
+        // Delete the existing image file using its full path
+        await deleteExistingProfileFromStorage(existingFullPath);
+      }
+
+      // Update profile object with new downloadUrl and storageFullPath
+      await docRef.update({
+        'profile.downloadUrl': userProfile?.downloadUrl,
+        'profile.storageFullPath': userProfile?.fullStoragePath,
+      });
+      return MyUser(
+        id: userId!,
+        firstName: profileData?['firstName'],
+        lastName: profileData?['lastName'],
+        email: profileData?['email'],
+        isAdmin: profileData?['isAdmin'] ?? false,
+        profilePic: userProfile?.downloadUrl,
+      );
+    } catch (e) {
+      print('Error updating profile picture: $e');
+      return null;
+    }
+  }
+
   // downloading file in the user device
   Future<void> downloadFilePublicly(String? userId, file) async {
     try {
@@ -148,34 +203,44 @@ class FirebaseAuthService {
     }
   }
 
-  Future<void> uploadFileToFirebase(File file, String folderPath) async {
-    final loggedUser = await Storage.getUser("user");
-    String? loggedUsername = loggedUser?.firstName ?? "";
-    print("loggedUser file upload => ${loggedUsername}");
-    // Create a storage reference with a unique filename
-    String fileName = file.path.split("/").last;
-    final storageRef = storage.ref().child('$folderPath/$fileName');
+  Future<UserProfile?> uploadFileToFirebase(
+      File file, String folderPath) async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      String? loggedUsername = loggedUser?.firstName ?? "";
+      print("loggedUser file upload => ${loggedUsername}");
+      // Create a storage reference with a unique filename
+      String fileName = file.path.split("/").last;
+      final storageRef = storage.ref().child('$folderPath/$fileName');
 
-    // Define custom metadata
-    final metadata = SettableMetadata(
-      customMetadata: {
-        'uploadBy': loggedUsername,
-      },
-    );
+      // Define custom metadata
+      final metadata = SettableMetadata(
+        customMetadata: {
+          'uploadBy': loggedUsername,
+        },
+      );
 
-    // Upload the file to Firebase Storage with custom metadata
-    final uploadTask = storageRef.putFile(file, metadata);
+      // Upload the file to Firebase Storage with custom metadata
+      final uploadTask = storageRef.putFile(file, metadata);
 
-    // Track upload progress (optional)
-    uploadTask.snapshotEvents.listen((event) {
-      int progress =
-          ((event.bytesTransferred / event.totalBytes) * 100).round();
-      // Display upload progress (e.g., with a progress bar)
-      print('Upload progress: $progress%');
-    });
+      // Track upload progress (optional)
+      uploadTask.snapshotEvents.listen((event) {
+        int progress =
+            ((event.bytesTransferred / event.totalBytes) * 100).round();
+        // Display upload progress (e.g., with a progress bar)
+        print('Upload progress: $progress%');
+      });
 
-    // Wait for the upload to complete
-    await uploadTask.whenComplete(() => print('Upload complete'));
+      // Wait for the upload to complete
+      await uploadTask.whenComplete(() => print('Upload complete'));
+      final downloadUrl = await storageRef.getDownloadURL();
+      final fullStoragePath = storageRef.fullPath;
+      return UserProfile(
+          downloadUrl: downloadUrl, fullStoragePath: fullStoragePath);
+    } catch (e) {
+      print("Error uploading file => $e");
+      return null;
+    }
   }
 
   //to upload blog
@@ -389,6 +454,7 @@ class FirebaseAuthService {
         'email': email,
         'password': hashedPassword,
         'isAdmin': false,
+        'profile': {'downloadUrl': "", 'storageFullPath': ""}
       };
 
       DocumentReference doc = await db.collection("users").add(user);
@@ -421,6 +487,7 @@ class FirebaseAuthService {
         lastName: userData['lastName'],
         email: userData['email'],
         isAdmin: userData['isAdmin'] ?? false,
+        profilePic: userData['profile']?['downloadUrl'] ?? "",
       );
     } catch (e) {
       print(e);
