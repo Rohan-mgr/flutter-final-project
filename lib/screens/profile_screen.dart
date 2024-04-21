@@ -3,6 +3,7 @@ import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/widgets/editProfileUI.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:flutter_final_project/widgets/popUpMenu.dart';
 
@@ -154,6 +155,11 @@ class _ProfileState extends State<Profile> {
                                           onPressed: () {
                                             // Handle edit button press (e.g., navigate to edit screen)
                                             print("Edit icon clicked");
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  EditProfileDialog(),
+                                            );
                                           },
                                           child: Icon(Icons.edit),
                                           style: ElevatedButton.styleFrom(
