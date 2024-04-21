@@ -33,7 +33,7 @@ class _ModalState extends State<Modal> {
 
         Navigator.pop(context, 'Add folder');
         Navigator.pop(context);
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => Home(
@@ -41,6 +41,7 @@ class _ModalState extends State<Modal> {
               bottomNavigationIndex: getSeletedTabIndex(widget.breadCrumbs[0]),
             ),
           ),
+          (Route<dynamic> route) => false,
         );
       } catch (error) {
         print("Error creating folder: $error");

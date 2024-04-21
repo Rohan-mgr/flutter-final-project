@@ -74,7 +74,8 @@ class _PopUpMenuState extends State<PopUpMenu> {
         await FirebaseAuthService().deleteFile(file['fullPath']);
         // Close both dialogs
         Navigator.of(context).pop();
-        Navigator.push(
+        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => Home(
@@ -82,6 +83,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
               bottomNavigationIndex: getSeletedTabIndex(widget.breadCrumbs[0]),
             ),
           ),
+          (Route<dynamic> route) => false,
         );
       } catch (e) {
         print('Error removing file: $e');
@@ -272,7 +274,8 @@ class _PopUpMenuState extends State<PopUpMenu> {
       try {
         await FirebaseAuthService()
             .removeFilesFromFavouriteList(file?['documentId']);
-        Navigator.push(
+        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => Home(
@@ -280,6 +283,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
               bottomNavigationIndex: getSeletedTabIndex('profile'),
             ),
           ),
+          (Route<dynamic> route) => false,
         );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -338,7 +342,8 @@ class _PopUpMenuState extends State<PopUpMenu> {
             } else if (value == 3) {
               final bool response = await downloadFile(widget.file);
               if (response && widget.isProfileSection) {
-                Navigator.push(
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                     builder: (context) => Home(
@@ -346,6 +351,7 @@ class _PopUpMenuState extends State<PopUpMenu> {
                       bottomNavigationIndex: getSeletedTabIndex('profile'),
                     ),
                   ),
+                  (Route<dynamic> route) => false,
                 );
               }
             } else if (value == 4) {
