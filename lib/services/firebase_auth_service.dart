@@ -3,6 +3,7 @@ import 'package:external_path/external_path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
+import 'package:flutter_final_project/types/Blogs.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
@@ -175,6 +176,64 @@ class FirebaseAuthService {
 
     // Wait for the upload to complete
     await uploadTask.whenComplete(() => print('Upload complete'));
+  }
+
+  //to upload blog
+  Future<void> uploadBlogToFirebase(
+      {required File filepath,
+      required String title,
+      required String content,
+      required String fileName}) async {
+    try {
+      final loggedInUser = (await Storage.getUser("user"))?.email;
+      const folderPath = "blogs";
+      final storageRef = storage.ref().child('$folderPath/$fileName');
+      final createdOn = Timestamp.now();
+      String? downloadRef;
+
+      //uploading thumbnail to firebase
+      await storageRef.putFile(filepath);
+      downloadRef = await storageRef.getDownloadURL();
+
+      Blog blog = new Blog(
+        title: title,
+        content: content,
+        imgUrl: downloadRef,
+        user: loggedInUser!,
+        createdOn: createdOn,
+      );
+
+      //upload to blog
+      DocumentReference doc = await db.collection("blogs").add(blog.toJson());
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  //get blogs
+  Future<List<Map>> getBlogs() async {
+    try {
+      final querySnapshot = await db.collection("blogs").get();
+      return querySnapshot.docs
+          .map((doc) => {'id': doc.reference.id, ...doc.data()})
+          .toList();
+    } catch (error) {
+      print(error);
+      return [];
+    }
+  }
+
+  Future<void> LikeBlog(
+      {required String blogId,
+      required String email,
+      required int likes}) async {
+    final documentReference = await db.collection("blogs").doc(blogId);
+    final reference = await db.collection("blogs").doc(blogId).get();
+    List likedByArr = reference.data()!["likedBy"];
+    await documentReference.update({
+      "likes": likes,
+      "likedBy": [...likedByArr, email]
+    });
   }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
