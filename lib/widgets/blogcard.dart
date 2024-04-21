@@ -16,7 +16,7 @@ class _BlogCardState extends State<BlogCard> {
   dynamic likes;
   dynamic blog;
   String date = "";
-  String? author;
+  String author = "";
 
   @override
   void initState() {
