@@ -185,7 +185,7 @@ class FirebaseAuthService {
       required String content,
       required String fileName}) async {
     try {
-      final loggedInUser = (await Storage.getUser("user"))?.email;
+      final loggedInUser = (await Storage.getUser("user"))!.email;
       const folderPath = "blogs";
       final storageRef = storage.ref().child('$folderPath/$fileName');
       final createdOn = Timestamp.now();
@@ -199,15 +199,25 @@ class FirebaseAuthService {
         title: title,
         content: content,
         imgUrl: downloadRef,
-        user: loggedInUser!,
+        user: loggedInUser,
         createdOn: createdOn,
       );
-
+      print("uploading");
       //upload to blog
       DocumentReference doc = await db.collection("blogs").add(blog.toJson());
+      print("completely called");
     } catch (error) {
       print(error);
     }
+  }
+
+  Future<String> getCorrespondingName({required String email}) async {
+    final user =
+        await db.collection("users").where("email", isEqualTo: email).get();
+
+    return user.docs[0].data()["firstName"] +
+        " " +
+        user.docs[0].data()["lastName"];
   }
 
   //get blogs
@@ -226,14 +236,18 @@ class FirebaseAuthService {
   Future<void> LikeBlog(
       {required String blogId,
       required String email,
-      required int likes}) async {
+      required int likes,
+      required bool isLiked}) async {
     final documentReference = await db.collection("blogs").doc(blogId);
     final reference = await db.collection("blogs").doc(blogId).get();
     List likedByArr = reference.data()!["likedBy"];
-    await documentReference.update({
-      "likes": likes,
-      "likedBy": [...likedByArr, email]
-    });
+    if (isLiked) {
+      likedByArr = [...likedByArr, email];
+    } else {
+      likedByArr.remove(email);
+    }
+
+    await documentReference.update({"likes": likes, "likedBy": likedByArr});
   }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {

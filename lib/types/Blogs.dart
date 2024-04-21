@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_final_project/types/user.dart';
 
 class Blog {
   String title;

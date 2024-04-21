@@ -16,12 +16,14 @@ class _BlogCardState extends State<BlogCard> {
   dynamic likes;
   dynamic blog;
   String date = "";
+  String? author;
 
   @override
   void initState() {
     super.initState();
     blog = widget.blogDetail;
     print(blog);
+    getAuthorName(email: blog["user"]);
     //set likes
     setState(() {
       likes = blog["likes"];
@@ -30,6 +32,15 @@ class _BlogCardState extends State<BlogCard> {
       date = trimDate();
     });
     checkIfLiked();
+  }
+
+  Future<void> getAuthorName({required String email}) async {
+    final authorName =
+        await FirebaseAuthService().getCorrespondingName(email: email);
+
+    setState(() {
+      author = authorName;
+    });
   }
 
   void checkIfLiked() async {
@@ -47,8 +58,11 @@ class _BlogCardState extends State<BlogCard> {
       isLiked = !isLiked;
       likes = isLiked ? likes + 1 : likes - 1;
     });
-    FirebaseAuthService()
-        .LikeBlog(blogId: blog["id"], email: loggedInUser.email, likes: likes);
+    FirebaseAuthService().LikeBlog(
+        blogId: blog["id"],
+        email: loggedInUser.email,
+        likes: likes,
+        isLiked: isLiked);
   }
 
   Future<void> getUser() async {
@@ -137,7 +151,7 @@ class _BlogCardState extends State<BlogCard> {
                   SizedBox(
                     width: 10,
                   ),
-                  Text("${loggedInUser?.firstName} ${loggedInUser?.lastName}"),
+                  Text("$author"),
                   SizedBox(
                     width: 5,
                   ),
