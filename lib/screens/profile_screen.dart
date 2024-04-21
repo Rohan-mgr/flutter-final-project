@@ -1,7 +1,11 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/types/profile.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:flutter_final_project/widgets/popUpMenu.dart';
@@ -15,9 +19,12 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   MyUser? user;
+  String userProfileUrl = "";
+  bool _isProfileUpdating = false;
   bool _isLoading = false;
   int downloadCount = 0;
   List<dynamic> favourites = [];
+  File? profilePicFile;
 
   @override
   void initState() {
@@ -28,16 +35,30 @@ class _ProfileState extends State<Profile> {
   Future<void> loadUserFromLocalStorage() async {
     try {
       final loggedUser = await Storage.getUser("user");
-      print('loggeduser id = ${loggedUser?.id}');
+      print('loggeduser profile tab = ${loggedUser?.toJson()}');
       if (loggedUser != null) {
         setState(() {
           user = loggedUser;
+          userProfileUrl = loggedUser.profilePic!;
         });
         await getFavoritesList();
         await getDownloadCount();
       }
     } catch (error) {
       print('Error retrieving user: $error');
+    }
+  }
+
+  Future<void> loadUserProfileUrl() async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          userProfileUrl = loggedUser.profilePic!;
+        });
+      }
+    } catch (error) {
+      print('Error retrieving user profile url: $error');
     }
   }
 
@@ -79,6 +100,52 @@ class _ProfileState extends State<Profile> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void handleProfilePicSelection() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png'],
+      );
+
+      if (result != null) {
+        setState(() {
+          profilePicFile = File(result.files.single.path!);
+        });
+        setState(() {
+          _isProfileUpdating = true;
+        });
+        UserProfile? userProfile = await FirebaseAuthService()
+            .uploadFileToFirebase(profilePicFile!, "profile");
+        if (userProfile == null) {
+          throw "Error uploading profile picture";
+        }
+        MyUser? userData = await FirebaseAuthService()
+            .updateUserProfilePicture(user?.id, userProfile);
+
+        await Storage.setUser("user", userData!);
+        await loadUserProfileUrl();
+        setState(() {
+          _isProfileUpdating = false;
+        });
+      } else {
+        setState(() {
+          _isProfileUpdating = false;
+        });
+        // User canceled the picker
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select photo to upload.'),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isProfileUpdating = false;
+      });
+      throw e;
     }
   }
 
@@ -132,30 +199,32 @@ class _ProfileState extends State<Profile> {
                                       Container(
                                         margin: EdgeInsets.only(top: 40.0),
                                         child: ClipOval(
-                                          child: Icon(
-                                            Icons.account_circle_rounded,
-                                            color: Colors.white,
-                                            size: 120,
-                                          ),
-                                          // Image.asset(
-                                          //   "assets/logo.png",
-                                          //   width: 120.0,
-                                          //   height: 120.0,
-                                          //   fit: BoxFit.cover,
-                                          // ),
+                                          child: userProfileUrl == ""
+                                              ? Icon(
+                                                  Icons.account_circle_rounded,
+                                                  color: Colors.white,
+                                                  size: 120,
+                                                )
+                                              : Image.network(
+                                                  userProfileUrl,
+                                                  width: 120.0,
+                                                  height: 120.0,
+                                                  fit: BoxFit.cover,
+                                                ),
                                         ),
                                       ),
 
                                       // Edit button positioned on bottom right of profile picture
                                       Positioned(
                                         bottom: 0.0,
-                                        right: 0.0,
+                                        right: -10.0,
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            // Handle edit button press (e.g., navigate to edit screen)
-                                            print("Edit icon clicked");
-                                          },
-                                          child: Icon(Icons.edit),
+                                          onPressed: handleProfilePicSelection,
+                                          child: !_isProfileUpdating
+                                              ? Icon(Icons.camera_alt)
+                                              : Loader(
+                                                  size: 20,
+                                                  color: Colors.deepPurple),
                                           style: ElevatedButton.styleFrom(
                                             shape: CircleBorder(),
                                             padding: EdgeInsets.all(8.0),

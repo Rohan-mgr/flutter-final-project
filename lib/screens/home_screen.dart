@@ -5,6 +5,7 @@ import 'package:flutter_final_project/screens/notes_screen.dart';
 import 'package:flutter_final_project/screens/profile_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
 import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 
 class Home extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
@@ -19,6 +20,8 @@ class _HomeState extends State<Home> {
   MyUser? user;
   int? _currentPageIndex = 0;
   List<String> breadCrumbs = [];
+  String userProfileUrl = "";
+  bool _isProfileUpdating = false;
 
   @override
   void initState() {
@@ -37,10 +40,33 @@ class _HomeState extends State<Home> {
       if (loggedUser != null) {
         setState(() {
           user = loggedUser;
+          userProfileUrl = loggedUser.profilePic!;
         });
       }
     } catch (error) {
       print('Error retrieving user: $error');
+    }
+  }
+
+  Future<void> loadUserProfileUrl() async {
+    try {
+      setState(() {
+        _isProfileUpdating = true;
+      });
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          userProfileUrl = loggedUser.profilePic!;
+        });
+      }
+      setState(() {
+        _isProfileUpdating = false;
+      });
+    } catch (error) {
+      setState(() {
+        _isProfileUpdating = false;
+      });
+      print('Error retrieving user profile url: $error');
     }
   }
 
@@ -49,6 +75,7 @@ class _HomeState extends State<Home> {
       _currentPageIndex = index;
       breadCrumbs = [];
     });
+    loadUserProfileUrl();
   }
 
   @override
@@ -85,11 +112,21 @@ class _HomeState extends State<Home> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.account_circle_rounded,
-                            color: Colors.white,
-                            size: 60,
-                          ),
+                          userProfileUrl == ""
+                              ? Icon(
+                                  Icons.account_circle_rounded,
+                                  color: Colors.white,
+                                  size: 60,
+                                )
+                              : _isProfileUpdating
+                                  ? Loader(size: 40, color: Colors.deepPurple)
+                                  : ClipOval(
+                                      child: Image.network(
+                                      userProfileUrl,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                    )),
                           SizedBox(width: 5),
                           Container(
                             margin: EdgeInsets.only(top: 7),
