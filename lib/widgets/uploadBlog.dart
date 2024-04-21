@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/helper/helper.dart';
+import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 
@@ -35,6 +37,18 @@ class _UploadBlogState extends State<UploadBlog> {
             title: title,
             content: content,
             fileName: fileName!);
+
+        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Home(
+              initialBreadCrumbs: [],
+              bottomNavigationIndex: getSeletedTabIndex("Blogs"),
+            ),
+          ),
+          (Route<dynamic> route) => false,
+        );
       } catch (err) {
         print(err);
       }

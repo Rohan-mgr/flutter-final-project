@@ -188,6 +188,7 @@ class FirebaseAuthService {
       final loggedInUser = (await Storage.getUser("user"))?.email;
       const folderPath = "blogs";
       final storageRef = storage.ref().child('$folderPath/$fileName');
+      final createdOn = Timestamp.now();
       String? downloadRef;
 
       //uploading thumbnail to firebase
@@ -199,17 +200,40 @@ class FirebaseAuthService {
         content: content,
         imgUrl: downloadRef,
         user: loggedInUser!,
+        createdOn: createdOn,
       );
+
       //upload to blog
       DocumentReference doc = await db.collection("blogs").add(blog.toJson());
-      print(doc.id);
     } catch (error) {
       print(error);
     }
+  }
 
-    //upload image
-    //get download link
-    //upload blog
+  //get blogs
+  Future<List<Map>> getBlogs() async {
+    try {
+      final querySnapshot = await db.collection("blogs").get();
+      return querySnapshot.docs
+          .map((doc) => {'id': doc.reference.id, ...doc.data()})
+          .toList();
+    } catch (error) {
+      print(error);
+      return [];
+    }
+  }
+
+  Future<void> LikeBlog(
+      {required String blogId,
+      required String email,
+      required int likes}) async {
+    final documentReference = await db.collection("blogs").doc(blogId);
+    final reference = await db.collection("blogs").doc(blogId).get();
+    List likedByArr = reference.data()!["likedBy"];
+    await documentReference.update({
+      "likes": likes,
+      "likedBy": [...likedByArr, email]
+    });
   }
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
