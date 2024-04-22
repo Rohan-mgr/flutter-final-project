@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/types/Blogs.dart';
@@ -171,26 +172,36 @@ class _BlogCardState extends State<BlogCard> {
               SizedBox(
                 height: 10,
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      blog["title"],
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/blog-view", arguments: blog);
+                },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                        height: 100,
+                        // color: Colors.red,
+                        child: Text(
+                          blog["title"],
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Image.network(
-                    blog["imgUrl"],
-                    width: 150,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-                ],
+                    Image.network(
+                      blog["imgUrl"],
+                      width: 150,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: 10,
