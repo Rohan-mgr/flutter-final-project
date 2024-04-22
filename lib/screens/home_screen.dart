@@ -22,6 +22,7 @@ class _HomeState extends State<Home> {
   List<String> breadCrumbs = [];
   String userProfileUrl = "";
   bool _isProfileUpdating = false;
+  String updatedUserName = "";
 
   @override
   void initState() {
@@ -70,12 +71,26 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<void> loadNewUserName() async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          updatedUserName = loggedUser.firstName + " " + loggedUser.lastName;
+        });
+      }
+    } catch (error) {
+      print('Error retrieving user profile url: $error');
+    }
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _currentPageIndex = index;
       breadCrumbs = [];
     });
     loadUserProfileUrl();
+    loadNewUserName();
   }
 
   @override
@@ -135,7 +150,8 @@ class _HomeState extends State<Home> {
                               children: [
                                 Text("Welcome, ",
                                     style: TextStyle(color: Colors.white)),
-                                Text('${user?.firstName} ${user?.lastName}',
+                                Text(
+                                    '${updatedUserName != '' ? updatedUserName : '${user?.firstName} ${user?.lastName}'}',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,

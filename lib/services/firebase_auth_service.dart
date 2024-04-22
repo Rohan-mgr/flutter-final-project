@@ -5,13 +5,10 @@ import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/types/Blogs.dart';
 import 'package:flutter_final_project/types/profile.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
 import "dart:io";
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 
@@ -105,6 +102,35 @@ class FirebaseAuthService {
       print('Existing image deleted from storage');
     } catch (e) {
       print('Error deleting image from storage: $e');
+    }
+  }
+
+  Future<MyUser?> updateUserName(
+      String newFirstName, String newLastName, user) async {
+    try {
+      final docRef = db.collection('users').doc(user?.id);
+      final docSnapshot = await docRef.get();
+      if (!docSnapshot.exists) {
+        print('User document not found');
+        return null;
+      }
+
+      await docRef.update({
+        'firstName': newFirstName,
+        'lastName': newLastName,
+      });
+
+      return MyUser(
+        id: user?.id,
+        firstName: newFirstName,
+        lastName: newLastName,
+        email: user?.email,
+        isAdmin: user?.isAdmin,
+        profilePic: user?.profilePic,
+      );
+    } catch (e) {
+      print("Error updating user name: $e");
+      return null;
     }
   }
 
