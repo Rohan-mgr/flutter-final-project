@@ -22,6 +22,7 @@ class _NotesState extends State<Notes> {
   List<dynamic> folders = [];
   List<String> breadCrumbs = [];
   bool _isLoading = false;
+  List<dynamic> selectedItems = [];
 
   @override
   void initState() {
@@ -156,6 +157,51 @@ class _NotesState extends State<Notes> {
     }
   }
 
+  void handleSelectedItem() async {
+    try {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return Center(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Loader(size: 30, color: Colors.red),
+                    SizedBox(height: 20),
+                    Text('Removing file... Please wait.'),
+                  ],
+                ),
+              ),
+            );
+          });
+      for (dynamic file in selectedItems) {
+        String fileType = file?['type'];
+        String filePath = file?['fullPath'];
+        if (fileType == 'folder') {
+          await FirebaseAuthService().deleteFolder(filePath);
+        } else {
+          await FirebaseAuthService().deleteFile(filePath);
+        }
+      }
+      setState(() {
+        selectedItems = [];
+      });
+      Navigator.of(context).pop();
+      getFilesAndFolders("Notes");
+    } catch (e) {
+      print("Error deleting files: $e");
+      throw e;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,6 +263,74 @@ class _NotesState extends State<Notes> {
                 getFilesAndFolders(breadCrumbs[index]);
               },
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 5,
+                ),
+                if (folders.length > 0)
+                  Row(
+                    children: [
+                      Checkbox(
+                        visualDensity: VisualDensity.compact,
+                        value: selectedItems.length == folders.length
+                            ? true
+                            : false,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value!) {
+                              setState(() {
+                                selectedItems = folders;
+                              });
+                            } else {
+                              setState(() {
+                                selectedItems = [];
+                              });
+                            }
+                          });
+                        },
+                      ),
+                      Text(
+                        "Select All",
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: Color.fromARGB(255, 80, 79, 79)),
+                      ),
+                    ],
+                  ),
+                Spacer(),
+                selectedItems.length > 0
+                    ? SizedBox(
+                        width: 90,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            backgroundColor: Colors.red[400],
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            side: BorderSide(color: Colors.red, width: 0.0),
+                          ),
+                          onPressed: handleSelectedItem,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 5),
+                              Text("Delete"),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+                SizedBox(width: 10),
+              ],
+            ),
             _isLoading
                 ? Positioned(
                     top: 50,
@@ -232,6 +346,7 @@ class _NotesState extends State<Notes> {
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
                               dynamic item = folders[index];
+                              bool isSelected = selectedItems.contains(item);
                               return Column(
                                 children: [
                                   Container(
@@ -240,98 +355,125 @@ class _NotesState extends State<Notes> {
                                         left: 5, right: 5, top: 2, bottom: 2),
                                     color: Color.fromRGBO(240, 238, 247, 1),
                                     child: ListTile(
-                                      contentPadding: EdgeInsets.only(left: 5),
-                                      title: Row(
-                                        children: [
-                                          (item['type'] == 'folder')
-                                              ? Container(
-                                                  margin: EdgeInsets.only(
-                                                      right: 10),
-                                                  child: Icon(
-                                                    Icons.folder,
-                                                    color: Colors.deepPurple,
-                                                    size: 32,
+                                      contentPadding: EdgeInsets.zero,
+                                      leading: Checkbox(
+                                        visualDensity: VisualDensity.compact,
+                                        value: isSelected,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            if (value!) {
+                                              selectedItems.add(item);
+                                            } else {
+                                              selectedItems.remove(item);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      title: Transform.translate(
+                                        offset: Offset(-20, 0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            (item['type'] == 'folder')
+                                                ? Container(
+                                                    margin: EdgeInsets.only(
+                                                        right: 10),
+                                                    child: Icon(
+                                                      Icons.folder,
+                                                      color: Colors.deepPurple,
+                                                      size: 32,
+                                                    ),
+                                                  )
+                                                : getCustomIcon(
+                                                    item['mimeType']),
+                                            // Container(
+                                            //     margin: EdgeInsets.only(
+                                            //         right: 10),
+                                            //     child: Icon(
+                                            //       Icons.insert_drive_file,
+                                            //       color: Colors.deepPurple,
+                                            //       size: 32,
+                                            //     ),
+                                            //   ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  child: Text(
+                                                    truncateFilename(
+                                                        item['name']),
                                                   ),
-                                                )
-                                              : getCustomIcon(item['mimeType']),
-                                          // Container(
-                                          //     margin: EdgeInsets.only(
-                                          //         right: 10),
-                                          //     child: Icon(
-                                          //       Icons.insert_drive_file,
-                                          //       color: Colors.deepPurple,
-                                          //       size: 32,
-                                          //     ),
-                                          //   ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                child: Text(
-                                                  truncateFilename(
-                                                      item['name']),
                                                 ),
-                                              ),
-                                              if (item['type'] == 'file')
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                        Icons
-                                                            .cloud_done_outlined,
-                                                        size: 17,
-                                                        color: Colors.grey),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 5),
-                                                      child: Text(
-                                                        item['fileSize'],
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: Colors.grey),
+                                                if (item['type'] == 'file')
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                          Icons
+                                                              .cloud_done_outlined,
+                                                          size: 17,
+                                                          color: Colors.grey),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5),
+                                                        child: Text(
+                                                          item['fileSize'],
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors.grey),
+                                                        ),
                                                       ),
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Icon(
-                                                        Icons.access_time_sharp,
-                                                        size: 16,
-                                                        color: Colors.grey),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 5),
-                                                      child: Text(
-                                                        item['createdAt'],
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: Colors.grey),
+                                                      SizedBox(width: 5),
+                                                      Icon(
+                                                          Icons
+                                                              .access_time_sharp,
+                                                          size: 16,
+                                                          color: Colors.grey),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5),
+                                                        child: Text(
+                                                          item['createdAt'],
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors.grey),
+                                                        ),
                                                       ),
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Icon(
-                                                        Icons.person_2_outlined,
-                                                        size: 16,
-                                                        color: Colors.grey),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 5),
-                                                      child: Text(
-                                                        item['uploadedBy'],
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: Colors.grey),
+                                                      SizedBox(width: 5),
+                                                      Icon(
+                                                          Icons
+                                                              .person_2_outlined,
+                                                          size: 16,
+                                                          color: Colors.grey),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5),
+                                                        child: Text(
+                                                          item['uploadedBy'],
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors.grey),
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                            ],
-                                          ),
-                                          Spacer(),
-                                          if (item['type'] == 'file')
-                                            PopUpMenu(
-                                              file: item,
-                                              breadCrumbs: breadCrumbs,
+                                                    ],
+                                                  ),
+                                              ],
                                             ),
-                                        ],
+                                            Spacer(),
+                                            if (item['type'] == 'file')
+                                              PopUpMenu(
+                                                file: item,
+                                                breadCrumbs: breadCrumbs,
+                                              ),
+                                          ],
+                                        ),
                                       ),
                                       onTap: () async {
                                         if (item['type'] == 'folder') {

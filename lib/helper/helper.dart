@@ -67,11 +67,11 @@ BootstrapAlert Alert(BuildContext context, String errMsg, ToastStatus status) {
 }
 
 String truncateFilename(String filename) {
-  if (filename.length <= 26) {
+  if (filename.length <= 24) {
     return filename;
   }
   // Truncate the filename and add "..."
-  return filename.substring(0, 26) + " ...";
+  return filename.substring(0, 24) + " ...";
 }
 
 void handlePreviewFile(context, file) async {
