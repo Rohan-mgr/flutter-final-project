@@ -7,6 +7,8 @@ import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/types/profile.dart';
 import 'package:flutter_final_project/types/user.dart';
+import 'package:flutter_final_project/widgets/changePasswordModal.dart';
+import 'package:flutter_final_project/widgets/editNameModal.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:flutter_final_project/widgets/popUpMenu.dart';
 
@@ -20,6 +22,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   MyUser? user;
   String userProfileUrl = "";
+  String updatedUserName = "";
   bool _isProfileUpdating = false;
   bool _isLoading = false;
   int downloadCount = 0;
@@ -55,6 +58,19 @@ class _ProfileState extends State<Profile> {
       if (loggedUser != null) {
         setState(() {
           userProfileUrl = loggedUser.profilePic!;
+        });
+      }
+    } catch (error) {
+      print('Error retrieving user profile url: $error');
+    }
+  }
+
+  Future<void> loadNewUserName() async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          updatedUserName = loggedUser.firstName + " " + loggedUser.lastName;
         });
       }
     } catch (error) {
@@ -233,17 +249,51 @@ class _ProfileState extends State<Profile> {
                                       ),
                                     ],
                                   ),
-                                  Text(
-                                    "${user?.firstName} ${user?.lastName}",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 22),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                          left: !_isProfileUpdating ? 70 : 0,
+                                        ),
+                                        child: Text(
+                                          // "${user?.firstName} ${user?.lastName}",
+                                          '${updatedUserName != '' ? updatedUserName : '${user?.firstName} ${user?.lastName}'}',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 22),
+                                        ),
+                                      ),
+                                      if (!_isProfileUpdating)
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            print("edit icon click");
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    EditProfileDialog(
+                                                      user: user!,
+                                                      refreshLocalStorage:
+                                                          loadNewUserName,
+                                                    ));
+                                          },
+                                          child: Icon(Icons.edit,
+                                              size: 20, color: Colors.white),
+                                          style: ElevatedButton.styleFrom(
+                                            shape: CircleBorder(),
+                                            backgroundColor: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  Text("${user?.email}",
-                                      style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 204, 197, 197))),
+                                  Text(
+                                    "${user?.email}",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 204, 197, 197),
+                                    ),
+                                  ),
                                 ],
                               ),
                             )
@@ -352,10 +402,47 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  InkWell(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                      padding: const EdgeInsets.all(5.0),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                          color: Colors.deepPurple,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lock_outline_rounded,
+                            color: Colors.deepPurple,
+                            size: 24,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            "Change Password",
+                            style: TextStyle(
+                                color: Colors.deepPurple,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) =>
+                              ChangePasswordDialog(user: user!));
+                    },
+                  ),
                   Row(
                     children: [
                       SizedBox(
-                        width: 5,
+                        width: 10,
                       ),
                       Icon(
                         Icons.favorite_outline_rounded,
@@ -400,7 +487,7 @@ class _ProfileState extends State<Profile> {
                                       children: [
                                         Container(
                                           margin: EdgeInsets.only(
-                                              left: 5,
+                                              left: 10,
                                               right: 5,
                                               top: 2,
                                               bottom: 2),
