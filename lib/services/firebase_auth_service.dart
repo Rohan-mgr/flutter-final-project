@@ -321,13 +321,18 @@ class FirebaseAuthService {
     }
   }
 
-  Future<String> getCorrespondingName({required String email}) async {
+  Future<Map> getCorrespondingNameAndAuthor({required String email}) async {
     final user =
         await db.collection("users").where("email", isEqualTo: email).get();
 
-    return user.docs[0].data()["firstName"] +
-        " " +
-        user.docs[0].data()["lastName"];
+    final result = user.docs[0].data();
+    print("lado bhitra");
+    print(result["profile"]["downloadUrl"]);
+
+    return {
+      "profileImgUrl": result["profile"]["downloadUrl"],
+      "author": "${result["firstName"]} ${result["lastName"]}"
+    };
   }
 
   //get blogs

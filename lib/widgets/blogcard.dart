@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
-import 'package:flutter_final_project/types/Blogs.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 
 class BlogCard extends StatefulWidget {
   final blogDetail;
@@ -17,30 +17,42 @@ class _BlogCardState extends State<BlogCard> {
   dynamic blog;
   String date = "";
   String author = "";
-
+  String profileImgUrl = "";
   @override
   void initState() {
     super.initState();
-    blog = widget.blogDetail;
+    setState(() {
+      blog = widget.blogDetail;
+    });
+    print("lado init");
     print(blog);
+    print("email =  ${blog["user"]}");
     getAuthorName(email: blog["user"]);
     //set likes
+    print("author and profile " + " " + author + " " + profileImgUrl);
     setState(() {
       likes = blog["likes"];
     });
+    print(blog);
     setState(() {
       date = trimDate();
+      blog["date"] = date;
     });
+
     checkIfLiked();
   }
 
-  Future<void> getAuthorName({required String email}) async {
-    final authorName =
-        await FirebaseAuthService().getCorrespondingName(email: email);
-
+  void getAuthorName({required String email}) async {
+    final authorNameAndProfile =
+        await FirebaseAuthService().getCorrespondingNameAndAuthor(email: email);
+    print(authorNameAndProfile);
     setState(() {
-      author = authorName;
+      author = authorNameAndProfile["author"];
+      profileImgUrl = authorNameAndProfile["profileImgUrl"];
+      blog["author"] = author;
+      blog["profileImgUrl"] = profileImgUrl;
     });
+    print("profileImgUrl = " + profileImgUrl);
   }
 
   void checkIfLiked() async {
@@ -70,6 +82,7 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       loggedInUser = user;
     });
+    print("ladouser" + loggedInUser);
   }
 
   String trimDate() {
@@ -137,16 +150,28 @@ class _BlogCardState extends State<BlogCard> {
         margin: EdgeInsets.all(10),
         // color: Colors.grey,
         child: Container(
-          height: 220,
-          padding: EdgeInsets.all(10),
+          height: 250,
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Column(
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    "assets/logo.png",
-                    width: 30,
-                    height: 30,
+                  Container(
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(shape: BoxShape.circle),
+                    child: profileImgUrl == ""
+                        ? Image.asset(
+                            "assets/logo.png",
+                            fit: BoxFit.cover,
+                            width: 30,
+                            height: 30,
+                          )
+                        : Image.network(
+                            "$profileImgUrl",
+                            width: 30,
+                            height: 30,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   SizedBox(
                     width: 10,
@@ -171,26 +196,50 @@ class _BlogCardState extends State<BlogCard> {
               SizedBox(
                 height: 10,
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      blog["title"],
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/blog-view", arguments: blog);
+                },
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                        height: 150,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              blog["title"],
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Wrap(
+                              children: [
+                                Text(
+                                  blog["content"],
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Image.network(
-                    blog["imgUrl"],
-                    width: 150,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-                ],
+                    Image.network(
+                      blog["imgUrl"],
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: 10,
@@ -218,7 +267,7 @@ class _BlogCardState extends State<BlogCard> {
                       ),
                     ],
                   ),
-                  Icon(Icons.more_horiz)
+                  // Icon(Icons.more_horiz)
                 ],
               )
             ],

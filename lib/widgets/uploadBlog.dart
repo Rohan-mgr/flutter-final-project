@@ -200,7 +200,7 @@ class _UploadBlogState extends State<UploadBlog> {
                       onPressed: handleSubmit,
                       child: Text(
                         "UPLOAD",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                       style: ButtonStyle(
                           shape: MaterialStatePropertyAll(

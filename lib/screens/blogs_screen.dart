@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 import 'package:flutter_final_project/widgets/blogcard.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
@@ -24,6 +22,7 @@ class _BlogsState extends State<Blogs> {
 
   Future<void> loadBlogs() async {
     dynamic response = await FirebaseAuthService().getBlogs();
+
     setState(() {
       data = response;
       _isLoading = false;

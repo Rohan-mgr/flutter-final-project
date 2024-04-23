@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/screens/blog_view.dart';
 import 'package:flutter_final_project/screens/forgot_password.dart';
 
 // Import your screen widgets here
@@ -25,4 +26,5 @@ Map<String, Widget Function(BuildContext)> get appRoutes => {
 
       //blogs
       "/upload-blog": (context) => UploadBlog(),
+      "/blog-view": (context) => BlogView(),
     };
