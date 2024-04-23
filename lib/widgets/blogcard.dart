@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
-import 'package:flutter_final_project/types/Blogs.dart';
 
 class BlogCard extends StatefulWidget {
   final blogDetail;
@@ -18,17 +16,23 @@ class _BlogCardState extends State<BlogCard> {
   dynamic blog;
   String date = "";
   String author = "";
+  String profileImgUrl = "";
 
   @override
   void initState() {
     super.initState();
-    blog = widget.blogDetail;
-    print(blog);
-    getAuthorName(email: blog["user"]);
+    setState(() {
+      blog = widget.blogDetail;
+    });
+    getAuthorNameAndProfile(email: blog["email"]);
     //set likes
+    print("author and profile " + " " + author + " " + profileImgUrl);
     setState(() {
       likes = blog["likes"];
+      blog["author"] = author;
+      blog["profileImg"] = profileImgUrl;
     });
+    print(blog);
     setState(() {
       date = trimDate();
       blog["date"] = date;
@@ -36,14 +40,10 @@ class _BlogCardState extends State<BlogCard> {
     checkIfLiked();
   }
 
-  Future<void> getAuthorName({required String email}) async {
-    final authorName =
-        await FirebaseAuthService().getCorrespondingName(email: email);
-
-    setState(() {
-      author = authorName;
-      blog["author"] = author;
-    });
+  void getAuthorNameAndProfile({required String email}) async {
+    final authorNameAndProfile = await FirebaseAuthService()
+        .getCorrespondingNameAndProfile(email: email);
+    print('Mingma ' + authorNameAndProfile["name"]);
   }
 
   void checkIfLiked() async {
@@ -52,9 +52,6 @@ class _BlogCardState extends State<BlogCard> {
       isLiked = blog["likedBy"]?.contains(loggedInUser!.email) ? true : false;
       blog["isLiked"] = isLiked;
     });
-    print(blog);
-    print("email =" + loggedInUser.email);
-    print(isLiked);
   }
 
   void handleLike() async {
@@ -199,7 +196,7 @@ class _BlogCardState extends State<BlogCard> {
                       ),
                     ),
                     Image.network(
-                      blog["imgUrl"],
+                      'assets/logo.png',
                       width: 150,
                       height: 100,
                       fit: BoxFit.cover,
