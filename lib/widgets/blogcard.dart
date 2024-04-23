@@ -32,13 +32,13 @@ class _BlogCardState extends State<BlogCard> {
     print("author and profile " + " " + author + " " + profileImgUrl);
     setState(() {
       likes = blog["likes"];
-      blog["author"] = author;
-      blog["profileImg"] = profileImgUrl;
     });
     print(blog);
     setState(() {
       date = trimDate();
+      blog["date"] = date;
     });
+
     checkIfLiked();
   }
 
@@ -49,6 +49,7 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       author = authorNameAndProfile["author"];
       profileImgUrl = authorNameAndProfile["profileImgUrl"];
+      blog["author"] = author;
       blog["profileImgUrl"] = profileImgUrl;
     });
     print("profileImgUrl = " + profileImgUrl);
