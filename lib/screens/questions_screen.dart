@@ -121,9 +121,7 @@ class _QuestionsState extends State<Questions> {
                         .min, // Prevent dialog from expanding unnecessarily
                     children: [
                       CenterTextCircularProgressIndicator(
-                        value: uploadedFiles / totalFiles,
                         text: '$uploadedFiles/$totalFiles',
-                        progressColor: const Color.fromARGB(255, 230, 223, 223),
                       ),
                       const SizedBox(height: 10), // Add some spacing
                       Text('Uploading files... Please wait.',
