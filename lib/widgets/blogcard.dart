@@ -31,6 +31,7 @@ class _BlogCardState extends State<BlogCard> {
     });
     setState(() {
       date = trimDate();
+      blog["date"] = date;
     });
     checkIfLiked();
   }
@@ -41,6 +42,7 @@ class _BlogCardState extends State<BlogCard> {
 
     setState(() {
       author = authorName;
+      blog["author"] = author;
     });
   }
 
@@ -48,8 +50,9 @@ class _BlogCardState extends State<BlogCard> {
     await getUser();
     setState(() {
       isLiked = blog["likedBy"]?.contains(loggedInUser!.email) ? true : false;
+      blog["isLiked"] = isLiked;
     });
-    print(blog["likedBy"]);
+    print(blog);
     print("email =" + loggedInUser.email);
     print(isLiked);
   }
@@ -58,6 +61,7 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       isLiked = !isLiked;
       likes = isLiked ? likes + 1 : likes - 1;
+      blog["isLiked"] = isLiked;
     });
     FirebaseAuthService().LikeBlog(
         blogId: blog["id"],
@@ -129,7 +133,7 @@ class _BlogCardState extends State<BlogCard> {
         break;
     }
 
-    return month + " " + timeArr[2];
+    return month + " " + timeArr[2] + "," + year;
   }
 
   @override

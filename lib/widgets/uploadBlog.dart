@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 
@@ -23,20 +24,25 @@ class _UploadBlogState extends State<UploadBlog> {
   File? filePath = null;
   String? fileName = null;
   bool isFileSelected = false;
+  bool isSubmitting = false;
 
   void handleSubmit() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         title = titleController.text;
         content = contentController.text;
+        isSubmitting = true;
       });
-
       try {
         await FirebaseAuthService().uploadBlogToFirebase(
             filepath: filePath!,
             title: title,
             content: content,
             fileName: fileName!);
+
+        setState(() {
+          isSubmitting = false;
+        });
 
         Navigator.pop(context);
         Navigator.pushAndRemoveUntil(
@@ -197,11 +203,19 @@ class _UploadBlogState extends State<UploadBlog> {
                       height: 15,
                     ),
                     ElevatedButton(
-                      onPressed: handleSubmit,
-                      child: Text(
-                        "UPLOAD",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
+                      onPressed: () {
+                        !isSubmitting ? handleSubmit() : "";
+                      },
+                      child: isSubmitting
+                          ? Loader(
+                              size: 30,
+                              color: Colors.black,
+                            )
+                          : Text(
+                              "UPLOAD",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
                       style: ButtonStyle(
                           shape: MaterialStatePropertyAll(
                               RoundedRectangleBorder(
