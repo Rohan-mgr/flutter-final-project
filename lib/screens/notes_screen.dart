@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
+import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/Modal.dart';
 import 'package:flutter_final_project/widgets/breadcrumbs.dart';
 import 'package:file_picker/file_picker.dart';
@@ -23,6 +25,7 @@ class _NotesState extends State<Notes> {
   List<String> breadCrumbs = [];
   bool _isLoading = false;
   List<dynamic> selectedItems = [];
+  MyUser? user;
 
   @override
   void initState() {
@@ -30,7 +33,21 @@ class _NotesState extends State<Notes> {
     if (widget.initialBreadCrumbs != null) {
       breadCrumbs = List<String>.from(widget.initialBreadCrumbs!);
     }
+    loadUserFromLocalStorage();
     getFilesAndFolders("Notes");
+  }
+
+  Future<void> loadUserFromLocalStorage() async {
+    try {
+      final loggedUser = await Storage.getUser("user");
+      if (loggedUser != null) {
+        setState(() {
+          user = loggedUser;
+        });
+      }
+    } catch (error) {
+      print('Error retrieving user: $error');
+    }
   }
 
   Future<void> getFilesAndFolders(String folderName) async {
@@ -263,74 +280,75 @@ class _NotesState extends State<Notes> {
                 getFilesAndFolders(breadCrumbs[index]);
               },
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: 5,
-                ),
-                if (folders.length > 0)
-                  Row(
-                    children: [
-                      Checkbox(
-                        visualDensity: VisualDensity.compact,
-                        value: selectedItems.length == folders.length
-                            ? true
-                            : false,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value!) {
-                              setState(() {
-                                selectedItems = folders;
-                              });
-                            } else {
-                              setState(() {
-                                selectedItems = [];
-                              });
-                            }
-                          });
-                        },
-                      ),
-                      Text(
-                        "Select All",
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: Color.fromARGB(255, 80, 79, 79)),
-                      ),
-                    ],
+            if (user != null && user!.isAdmin)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 5,
                   ),
-                Spacer(),
-                selectedItems.length > 0
-                    ? SizedBox(
-                        width: 90,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            backgroundColor: Colors.red[400],
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            side: BorderSide(color: Colors.red, width: 0.0),
-                          ),
-                          onPressed: handleSelectedItem,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.delete,
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 5),
-                              Text("Delete"),
-                            ],
-                          ),
+                  if (folders.length > 0)
+                    Row(
+                      children: [
+                        Checkbox(
+                          visualDensity: VisualDensity.compact,
+                          value: selectedItems.length == folders.length
+                              ? true
+                              : false,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value!) {
+                                setState(() {
+                                  selectedItems = [...folders];
+                                });
+                              } else {
+                                setState(() {
+                                  selectedItems = [];
+                                });
+                              }
+                            });
+                          },
                         ),
-                      )
-                    : Container(),
-                SizedBox(width: 10),
-              ],
-            ),
+                        Text(
+                          "Select All",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: Color.fromARGB(255, 80, 79, 79)),
+                        ),
+                      ],
+                    ),
+                  Spacer(),
+                  selectedItems.length > 0
+                      ? SizedBox(
+                          width: 90,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              backgroundColor: Colors.red[400],
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              side: BorderSide(color: Colors.red, width: 0.0),
+                            ),
+                            onPressed: handleSelectedItem,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 5),
+                                Text("Delete"),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Container(),
+                  SizedBox(width: 10),
+                ],
+              ),
             _isLoading
                 ? Positioned(
                     top: 50,
@@ -356,21 +374,26 @@ class _NotesState extends State<Notes> {
                                     color: Color.fromRGBO(240, 238, 247, 1),
                                     child: ListTile(
                                       contentPadding: EdgeInsets.zero,
-                                      leading: Checkbox(
-                                        visualDensity: VisualDensity.compact,
-                                        value: isSelected,
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            if (value!) {
-                                              selectedItems.add(item);
-                                            } else {
-                                              selectedItems.remove(item);
-                                            }
-                                          });
-                                        },
-                                      ),
+                                      leading: user!.isAdmin
+                                          ? Checkbox(
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              value: isSelected,
+                                              onChanged: (bool? value) {
+                                                setState(() {
+                                                  if (value!) {
+                                                    selectedItems.add(item);
+                                                  } else {
+                                                    selectedItems.remove(item);
+                                                  }
+                                                });
+                                              },
+                                            )
+                                          : null,
                                       title: Transform.translate(
-                                        offset: Offset(-20, 0),
+                                        offset: user!.isAdmin
+                                            ? Offset(-20, 0)
+                                            : Offset(10, 0),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.start,
