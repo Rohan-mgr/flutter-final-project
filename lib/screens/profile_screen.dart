@@ -28,6 +28,7 @@ class _ProfileState extends State<Profile> {
   int downloadCount = 0;
   List<dynamic> favourites = [];
   File? profilePicFile;
+  List<dynamic> selectedItems = [];
 
   @override
   void initState() {
@@ -38,7 +39,6 @@ class _ProfileState extends State<Profile> {
   Future<void> loadUserFromLocalStorage() async {
     try {
       final loggedUser = await Storage.getUser("user");
-      print('loggeduser profile tab = ${loggedUser?.toJson()}');
       if (loggedUser != null) {
         setState(() {
           user = loggedUser;
@@ -165,6 +165,47 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  void handleSelectedItem() async {
+    try {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return Center(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Loader(size: 30, color: Colors.red),
+                    SizedBox(height: 20),
+                    Text('Removing favourite file... Please wait.'),
+                  ],
+                ),
+              ),
+            );
+          });
+      for (dynamic file in selectedItems) {
+        print("favourite file =>>>>>>>>>>> ${file?.toString()}");
+        await FirebaseAuthService()
+            .removeFilesFromFavouriteList(file?['documentId']);
+      }
+      setState(() {
+        selectedItems = [];
+      });
+      Navigator.of(context).pop();
+      getFavoritesList();
+    } catch (e) {
+      print("Error deleting favourite files: $e");
+      throw e;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,14 +213,14 @@ class _ProfileState extends State<Profile> {
         slivers: [
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 370,
+              height: 320,
               child: Stack(
                 children: [
                   Column(
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 300,
+                        height: 270,
                         decoration: BoxDecoration(
                           color: Colors.deepPurple,
                         ),
@@ -213,7 +254,7 @@ class _ProfileState extends State<Profile> {
                                   Stack(
                                     children: [
                                       Container(
-                                        margin: EdgeInsets.only(top: 40.0),
+                                        margin: EdgeInsets.only(top: 25.0),
                                         child: ClipOval(
                                           child: userProfileUrl == ""
                                               ? Icon(
@@ -303,12 +344,12 @@ class _ProfileState extends State<Profile> {
                     ],
                   ),
                   Positioned(
-                    top: 230,
+                    top: 215,
                     left: 30,
                     right: 30,
                     child: Center(
                       child: Container(
-                        height: 120,
+                        height: 90,
                         width: 350,
                         decoration: BoxDecoration(
                             color: Colors.white,
@@ -404,7 +445,7 @@ class _ProfileState extends State<Profile> {
                 children: [
                   InkWell(
                     child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                      margin: EdgeInsets.only(left: 5, right: 5, bottom: 10),
                       padding: const EdgeInsets.all(5.0),
                       height: 50,
                       decoration: BoxDecoration(
@@ -442,7 +483,7 @@ class _ProfileState extends State<Profile> {
                   Row(
                     children: [
                       SizedBox(
-                        width: 10,
+                        width: 5,
                       ),
                       Icon(
                         Icons.favorite_outline_rounded,
@@ -466,6 +507,74 @@ class _ProfileState extends State<Profile> {
                       )
                     ],
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (favourites.length > 0)
+                        Row(
+                          children: [
+                            SizedBox(width: 5),
+                            Checkbox(
+                              visualDensity: VisualDensity.compact,
+                              value: selectedItems.length == favourites.length
+                                  ? true
+                                  : false,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value!) {
+                                    setState(() {
+                                      selectedItems = [...favourites];
+                                    });
+                                  } else {
+                                    setState(() {
+                                      selectedItems = [];
+                                    });
+                                  }
+                                });
+                              },
+                            ),
+                            Text(
+                              "Select All",
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color.fromARGB(255, 80, 79, 79)),
+                            ),
+                          ],
+                        ),
+                      Spacer(),
+                      selectedItems.length > 0
+                          ? SizedBox(
+                              width: 100,
+                              height: 30,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  backgroundColor: Colors.red[400],
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  side:
+                                      BorderSide(color: Colors.red, width: 0.0),
+                                ),
+                                onPressed: handleSelectedItem,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.heart_broken_outlined,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text("Remove"),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : Container(),
+                      SizedBox(width: 10),
+                    ],
+                  ),
                   _isLoading
                       ? Padding(
                           padding: const EdgeInsets.only(top: 20.0),
@@ -477,104 +586,126 @@ class _ProfileState extends State<Profile> {
                           ),
                         )
                       : Container(
-                          height: 340,
+                          height: 298,
                           child: favourites.length != 0
                               ? ListView.builder(
                                   itemBuilder:
                                       (BuildContext context, int index) {
                                     dynamic item = favourites[index];
+                                    bool isSelected =
+                                        selectedItems.contains(item);
+
                                     return Column(
                                       children: [
                                         Container(
                                           margin: EdgeInsets.only(
-                                              left: 10,
-                                              right: 5,
-                                              top: 2,
-                                              bottom: 2),
+                                              left: 5, right: 0, bottom: 2),
                                           color:
                                               Color.fromRGBO(240, 238, 247, 1),
                                           child: ListTile(
-                                            contentPadding:
-                                                EdgeInsets.only(left: 5),
-                                            title: Row(
-                                              children: [
-                                                getCustomIcon(item['mimeType']),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      child: Text(
-                                                        truncateFilename(
-                                                            item['name']),
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: Checkbox(
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              value: isSelected,
+                                              onChanged: (bool? value) {
+                                                setState(() {
+                                                  if (value!) {
+                                                    selectedItems.add(item);
+                                                  } else {
+                                                    selectedItems.remove(item);
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                            title: Transform.translate(
+                                              offset: Offset(-22, 0),
+                                              child: Row(
+                                                children: [
+                                                  getCustomIcon(
+                                                      item['mimeType']),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Container(
+                                                        child: Text(
+                                                          truncateFilename(
+                                                              item['name']),
+                                                        ),
                                                       ),
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                            Icons
-                                                                .cloud_done_outlined,
-                                                            size: 17,
-                                                            color: Colors.grey),
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 5),
-                                                          child: Text(
-                                                            item['size'],
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Colors
-                                                                    .grey),
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                              Icons
+                                                                  .cloud_done_outlined,
+                                                              size: 17,
+                                                              color:
+                                                                  Colors.grey),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 5),
+                                                            child: Text(
+                                                              item['size'],
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .grey),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        SizedBox(width: 5),
-                                                        Icon(
-                                                            Icons
-                                                                .access_time_sharp,
-                                                            size: 16,
-                                                            color: Colors.grey),
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 5),
-                                                          child: Text(
-                                                            item['createdAt'],
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Colors
-                                                                    .grey),
+                                                          SizedBox(width: 5),
+                                                          Icon(
+                                                              Icons
+                                                                  .access_time_sharp,
+                                                              size: 16,
+                                                              color:
+                                                                  Colors.grey),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 5),
+                                                            child: Text(
+                                                              item['createdAt'],
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .grey),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        SizedBox(width: 5),
-                                                        Icon(
-                                                            Icons
-                                                                .person_2_outlined,
-                                                            size: 16,
-                                                            color: Colors.grey),
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 5),
-                                                          child: Text(
-                                                            item['uploadedBy'],
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Colors
-                                                                    .grey),
+                                                          SizedBox(width: 5),
+                                                          Icon(
+                                                              Icons
+                                                                  .person_2_outlined,
+                                                              size: 16,
+                                                              color:
+                                                                  Colors.grey),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 5),
+                                                            child: Text(
+                                                              item[
+                                                                  'uploadedBy'],
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .grey),
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                Spacer(),
-                                                PopUpMenu(
-                                                  file: item,
-                                                  breadCrumbs: [],
-                                                  isProfileSection: true,
-                                                )
-                                              ],
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Spacer(),
+                                                  PopUpMenu(
+                                                    file: item,
+                                                    breadCrumbs: [],
+                                                    isProfileSection: true,
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                             onTap: () async {
                                               handlePreviewFile(context, item);
