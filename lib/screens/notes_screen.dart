@@ -54,6 +54,7 @@ class _NotesState extends State<Notes> {
     try {
       setState(() {
         _isLoading = true;
+        selectedItems = [];
       });
       // initially add Notes to the breadcrumbs
       if (breadCrumbs.length < 1) {
