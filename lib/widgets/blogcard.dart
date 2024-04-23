@@ -24,7 +24,10 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       blog = widget.blogDetail;
     });
-    getAuthorNameAndProfile(email: blog["email"]);
+    print("lado init");
+    print(blog);
+    print("email =  ${blog["user"]}");
+    getAuthorName(email: blog["user"]);
     //set likes
     print("author and profile " + " " + author + " " + profileImgUrl);
     setState(() {
@@ -35,30 +38,36 @@ class _BlogCardState extends State<BlogCard> {
     print(blog);
     setState(() {
       date = trimDate();
-      blog["date"] = date;
     });
     checkIfLiked();
   }
 
-  void getAuthorNameAndProfile({required String email}) async {
-    final authorNameAndProfile = await FirebaseAuthService()
-        .getCorrespondingNameAndProfile(email: email);
-    print('Mingma ' + authorNameAndProfile["name"]);
+  void getAuthorName({required String email}) async {
+    final authorNameAndProfile =
+        await FirebaseAuthService().getCorrespondingNameAndAuthor(email: email);
+    print(authorNameAndProfile);
+    setState(() {
+      author = authorNameAndProfile["author"];
+      profileImgUrl = authorNameAndProfile["profileImgUrl"];
+      blog["profileImgUrl"] = profileImgUrl;
+    });
+    print("profileImgUrl = " + profileImgUrl);
   }
 
   void checkIfLiked() async {
     await getUser();
     setState(() {
       isLiked = blog["likedBy"]?.contains(loggedInUser!.email) ? true : false;
-      blog["isLiked"] = isLiked;
     });
+    print(blog["likedBy"]);
+    print("email =" + loggedInUser.email);
+    print(isLiked);
   }
 
   void handleLike() async {
     setState(() {
       isLiked = !isLiked;
       likes = isLiked ? likes + 1 : likes - 1;
-      blog["isLiked"] = isLiked;
     });
     FirebaseAuthService().LikeBlog(
         blogId: blog["id"],
@@ -72,6 +81,7 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       loggedInUser = user;
     });
+    print("ladouser" + loggedInUser);
   }
 
   String trimDate() {
@@ -130,7 +140,7 @@ class _BlogCardState extends State<BlogCard> {
         break;
     }
 
-    return month + " " + timeArr[2] + "," + year;
+    return month + " " + timeArr[2];
   }
 
   @override
@@ -145,10 +155,22 @@ class _BlogCardState extends State<BlogCard> {
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    "assets/logo.png",
-                    width: 30,
-                    height: 30,
+                  Container(
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(shape: BoxShape.circle),
+                    child: profileImgUrl == ""
+                        ? Image.asset(
+                            "assets/logo.png",
+                            fit: BoxFit.cover,
+                            width: 30,
+                            height: 30,
+                          )
+                        : Image.network(
+                            "$profileImgUrl",
+                            width: 30,
+                            height: 30,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   SizedBox(
                     width: 10,
@@ -196,7 +218,7 @@ class _BlogCardState extends State<BlogCard> {
                       ),
                     ),
                     Image.network(
-                      'assets/logo.png',
+                      blog["imgUrl"],
                       width: 150,
                       height: 100,
                       fit: BoxFit.cover,

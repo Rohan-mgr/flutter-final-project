@@ -22,14 +22,11 @@ class _BlogsState extends State<Blogs> {
 
   Future<void> loadBlogs() async {
     dynamic response = await FirebaseAuthService().getBlogs();
-    print("lado response ");
-    print(response);
+
     setState(() {
       data = response;
       _isLoading = false;
     });
-    print("lado data");
-    print(data);
   }
 
   @override
