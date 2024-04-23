@@ -188,6 +188,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       bottomNavigationBar: NavigationBar(
+        height: 70,
         onDestinationSelected: _onItemTapped,
         indicatorColor: Colors.deepPurple,
         selectedIndex: _currentPageIndex!,
