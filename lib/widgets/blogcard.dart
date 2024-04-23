@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/storage.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 
 class BlogCard extends StatefulWidget {
   final blogDetail;
@@ -17,7 +18,6 @@ class _BlogCardState extends State<BlogCard> {
   String date = "";
   String author = "";
   String profileImgUrl = "";
-
   @override
   void initState() {
     super.initState();
@@ -150,8 +150,8 @@ class _BlogCardState extends State<BlogCard> {
         margin: EdgeInsets.all(10),
         // color: Colors.grey,
         child: Container(
-          height: 220,
-          padding: EdgeInsets.all(10),
+          height: 250,
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Column(
             children: [
               Row(
@@ -201,27 +201,41 @@ class _BlogCardState extends State<BlogCard> {
                   Navigator.pushNamed(context, "/blog-view", arguments: blog);
                 },
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                        height: 100,
-                        // color: Colors.red,
-                        child: Text(
-                          blog["title"],
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                        height: 150,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              blog["title"],
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Wrap(
+                              children: [
+                                Text(
+                                  blog["content"],
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              ],
+                            )
+                          ],
                         ),
                       ),
                     ),
                     Image.network(
                       blog["imgUrl"],
                       width: 150,
-                      height: 100,
+                      height: 150,
                       fit: BoxFit.cover,
                     ),
                   ],

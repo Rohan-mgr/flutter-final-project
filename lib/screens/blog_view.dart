@@ -89,7 +89,7 @@ class _BlogViewState extends State<BlogView> {
                                 clipBehavior: Clip.antiAlias,
                                 decoration:
                                     BoxDecoration(shape: BoxShape.circle),
-                                child: Image.network(data["imgUrl"],
+                                child: Image.network(data["profileImgUrl"],
                                     fit: BoxFit.cover),
                               ),
                               SizedBox(
