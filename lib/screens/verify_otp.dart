@@ -1,5 +1,3 @@
-
-
 import 'package:flutter_final_project/services/mailer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
@@ -28,42 +26,41 @@ class _VerifyOtpState extends State<VerifyOtp> {
       _error = "";
     });
     bool otpMatched =
-    await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
-
         await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
+
+    await FirebaseAuthService().verifyOTP(otp: otp, email: email!);
 
     if (otpMatched) {
 //go to new password screen
-Navigator.popAndPushNamed(context, "/new-password", arguments: email);
-}else{
-setState(() {
-_isSubmitting = false;
-_error = "Invalid OTP";
-});
-}
-
+      Navigator.popAndPushNamed(context, "/new-password", arguments: email);
+    } else {
+      setState(() {
+        _isSubmitting = false;
+        _error = "Invalid OTP";
+      });
+    }
   }
 
-
-  void sendAgainHandler() async{
-
+  void sendAgainHandler() async {
     setState(() {
       _sendingAgain = true;
     });
     var username = await FirebaseAuthService().userExists(email: email!);
-    bool result =  await sendMail(recipientEmail: email,recipientName: username);
-    Future.delayed( Duration(seconds: 15),() {
-      setState(() {
-        _sendingAgain = false;
-      });
-    },);
+    bool result =
+        await sendMail(recipientEmail: email, recipientName: username);
+    Future.delayed(
+      Duration(seconds: 15),
+      () {
+        setState(() {
+          _sendingAgain = false;
+        });
+      },
+    );
 
-
-    if(!result){
+    if (!result) {
       print("error sending mail");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -77,10 +74,22 @@ _error = "Invalid OTP";
           alignment: Alignment.center,
           child: ListView(
             children: [
-              Image.asset(
-                "assets/logo.png",
-                width: 100,
-                height: 100,
+              Container(
+                height: 180.0,
+                padding: EdgeInsets.all(25),
+                width: 180.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.deepPurple, // Adjust border color as needed
+                    width: 2.0, // Adjust border width as needed
+                  ),
+                ),
+                child: Image.asset(
+                  'assets/logo2.gif',
+                  height: 95.0,
+                  width: 98.0,
+                ),
               ),
               const SizedBox(
                 height: 20,
@@ -123,37 +132,38 @@ _error = "Invalid OTP";
               SizedBox(
                 height: 15,
               ),
-                _sendingAgain?Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Resent Successful",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ))
-                  ],
-                ) :Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Didn't receive OTP?",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    GestureDetector(
-                      onTap: sendAgainHandler,
-                      child: Text("Send Again",
+              _sendingAgain
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Resent Successful",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ))
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Didn't receive OTP?",
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
-                            color: Colors.blue,
-                          )),
-                    )
-                  ],
-                )
-            ,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        GestureDetector(
+                          onTap: sendAgainHandler,
+                          child: Text("Send Again",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.deepPurple,
+                              )),
+                        )
+                      ],
+                    ),
               SizedBox(
                 height: 40,
               ),
@@ -161,7 +171,7 @@ _error = "Invalid OTP";
                 onPressed: SubmitHandler,
                 child: _isSubmitting ? Loader() : Text("Submit"),
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(

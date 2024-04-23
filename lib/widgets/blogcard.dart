@@ -137,7 +137,7 @@ class _BlogCardState extends State<BlogCard> {
         margin: EdgeInsets.all(10),
         // color: Colors.grey,
         child: Container(
-          height: 200,
+          height: 220,
           padding: EdgeInsets.all(10),
           child: Column(
             children: [
