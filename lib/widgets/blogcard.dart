@@ -233,7 +233,7 @@ class _BlogCardState extends State<BlogCard> {
                       ),
                     ],
                   ),
-                  Icon(Icons.more_horiz)
+                  // Icon(Icons.more_horiz)
                 ],
               )
             ],
