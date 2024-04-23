@@ -53,6 +53,21 @@ class FirebaseAuthService {
     }
   }
 
+  Future<void> deleteFolder(String folderPath) async {
+    final storageRef = storage.ref().child(folderPath);
+    final listResult = await storageRef.listAll();
+
+    // Delete files in the current folder
+    await Future.forEach(listResult.items, (Reference item) async {
+      await item.delete();
+    });
+
+    // Recursively delete subfolders
+    await Future.forEach(listResult.prefixes, (prefix) async {
+      await deleteFolder(prefix.fullPath);
+    });
+  }
+
   Future<String?> getFileDownloadUrl(String filePath) async {
     try {
       final fileUrl = await storage.ref().child(filePath).getDownloadURL();
@@ -351,7 +366,9 @@ class FirebaseAuthService {
 
       // Add folders to the list
       for (var prefix in listResult.prefixes) {
-        foldersAndFiles.add({'type': 'folder', 'name': prefix.name});
+        final fullPath = '${folderPath}/${prefix.name}';
+        foldersAndFiles
+            .add({'type': 'folder', 'name': prefix.name, 'fullPath': fullPath});
       }
 
       // Add files to the list
@@ -575,40 +592,4 @@ class FirebaseAuthService {
       return false;
     }
   }
-
-  // for signing out
-  // Future<void> signOut() async {
-  //   await _firebaseAuth.signOut();
-  // }
-
-  // for authentication using email/password providers
-  // Future<User?> createUserWithEmailAndPassword(
-  //     String email, String password) async {
-  //   try {
-  //     final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-  //       email: email,
-  //       password: password,
-  //     );
-  //     return userCredential.user;
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
-
-  // for sign in authentication with email/password providers
-  // Future<User?> signInWithEmailAndPassword(
-  //     String email, String password) async {
-  //   print('$email, $password, login ');
-  //   try {
-  //     final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-  //       email: email,
-  //       password: password,
-  //     );
-  //     return userCredential.user;
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
 }
