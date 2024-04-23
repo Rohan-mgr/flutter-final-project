@@ -92,10 +92,22 @@ class _SignUpState extends State<SignUp> {
             // mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
             children: [
               // App logo (optional)
-              Image.asset(
-                'assets/logo.png',
-                height: 100.0,
-                width: 100.0,
+              Container(
+                height: 180.0,
+                padding: EdgeInsets.all(25),
+                width: 180.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.deepPurple, // Adjust border color as needed
+                    width: 2.0, // Adjust border width as needed
+                  ),
+                ),
+                child: Image.asset(
+                  'assets/logo2.gif',
+                  height: 95.0,
+                  width: 98.0,
+                ),
               ),
               const SizedBox(height: 10.0),
               Center(
@@ -117,7 +129,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 10.0),
+              const SizedBox(height: 20.0),
               TextFormField(
                 controller: lastNameController,
                 validator:
@@ -128,7 +140,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 10.0),
+              const SizedBox(height: 20.0),
               TextFormField(
                 controller: emailController,
                 validator: ValidationBuilder().email().maxLength(50).build(),
@@ -138,7 +150,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 10.0),
+              const SizedBox(height: 20.0),
               TextFormField(
                 controller: passwordController,
                 validator: ValidationBuilder()
@@ -162,7 +174,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 obscureText: !_showPassword,
               ),
-              const SizedBox(height: 10.0),
+              const SizedBox(height: 20.0),
 
               OutlinedButton(
                 style: OutlinedButton.styleFrom(

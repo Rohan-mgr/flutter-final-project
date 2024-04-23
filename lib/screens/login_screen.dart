@@ -77,10 +77,22 @@ class _LoginState extends State<Login> {
           child: ListView(
             // mainAxisSize: MainAxisSize.min, // Avoid excessive stretching
             children: [
-              Image.asset(
-                'assets/logo.png',
-                height: 100.0,
-                width: 100.0,
+              Container(
+                height: 180.0,
+                padding: EdgeInsets.all(25),
+                width: 180.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.deepPurple, // Adjust border color as needed
+                    width: 2.0, // Adjust border width as needed
+                  ),
+                ),
+                child: Image.asset(
+                  'assets/logo2.gif',
+                  height: 95.0,
+                  width: 98.0,
+                ),
               ),
               const SizedBox(height: 10.0),
               Center(
@@ -101,7 +113,7 @@ class _LoginState extends State<Login> {
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 10.0),
+              const SizedBox(height: 20.0),
               TextFormField(
                 controller: passwordController,
                 validator:

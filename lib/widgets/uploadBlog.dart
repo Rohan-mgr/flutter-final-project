@@ -104,15 +104,6 @@ class _UploadBlogState extends State<UploadBlog> {
                     SizedBox(
                       height: 10,
                     ),
-                    TextFormField(
-                      controller: titleController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(), labelText: "Title*"),
-                      validator: ValidationBuilder().required().build(),
-                    ),
-                    SizedBox(
-                      height: 40,
-                    ),
                     Row(
                       children: [
                         Text(
@@ -180,32 +171,45 @@ class _UploadBlogState extends State<UploadBlog> {
                     SizedBox(
                       height: 20,
                     ),
+                    Text('Title*:'),
                     TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      minLines: 10,
-                      controller: contentController,
-                      validator: ValidationBuilder().required().build(),
+                      controller: titleController,
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(), labelText: "Content*"),
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: ValidationBuilder().required().build(),
                     ),
                     SizedBox(
                       height: 20,
+                    ),
+                    Text('Content*:'),
+                    TextFormField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      minLines: 9,
+                      controller: contentController,
+                      validator: ValidationBuilder().required().build(),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
                     ),
                     ElevatedButton(
                       onPressed: handleSubmit,
                       child: Text(
                         "UPLOAD",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                       style: ButtonStyle(
                           shape: MaterialStatePropertyAll(
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15))),
-                          // backgroundColor:
-                          // MaterialStatePropertyAll(Colors.deepPurple),
+                          backgroundColor:
+                              MaterialStatePropertyAll(Colors.deepPurple),
                           padding:
-                              MaterialStatePropertyAll(EdgeInsets.all(25))),
+                              MaterialStatePropertyAll(EdgeInsets.all(20))),
                     )
                   ],
                 ),
