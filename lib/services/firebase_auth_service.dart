@@ -244,15 +244,19 @@ class FirebaseAuthService {
     }
   }
 
-  Future<UserProfile?> uploadFileToFirebase(
-      File file, String folderPath) async {
+  Future<UserProfile?> uploadFileToFirebase(File file, String folderPath,
+      [bool? isProfilePic]) async {
     try {
       final loggedUser = await Storage.getUser("user");
       String? loggedUsername = loggedUser?.firstName ?? "";
       print("loggedUser file upload => ${loggedUsername}");
+
+      // Check for null and assign default value (optional)
+      bool useProfilePicPrefix = isProfilePic ?? false;
       // Create a storage reference with a unique filename
       String fileName = file.path.split("/").last;
-      final storageRef = storage.ref().child('$folderPath/$fileName');
+      final storageRef = storage.ref().child(
+          '$folderPath/${useProfilePicPrefix ? "${Uuid().v4()}_" : ""}$fileName');
 
       // Define custom metadata
       final metadata = SettableMetadata(

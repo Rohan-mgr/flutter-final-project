@@ -134,7 +134,7 @@ class _ProfileState extends State<Profile> {
           _isProfileUpdating = true;
         });
         UserProfile? userProfile = await FirebaseAuthService()
-            .uploadFileToFirebase(profilePicFile!, "profile");
+            .uploadFileToFirebase(profilePicFile!, "profile", true);
         if (userProfile == null) {
           throw "Error uploading profile picture";
         }
