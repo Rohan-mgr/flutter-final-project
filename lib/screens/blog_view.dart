@@ -126,7 +126,7 @@ class _BlogViewState extends State<BlogView> {
                       children: [
                         Text(
                           data["content"],
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 15),
                         )
                       ],
                     ),
