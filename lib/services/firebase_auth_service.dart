@@ -548,10 +548,16 @@ class FirebaseAuthService {
   }
 
   Future<bool> updatePassword(
-      {required String email, required String newPassword}) async {
+      {required String email,
+      required String newPassword,
+      String? oldPassword}) async {
     try {
       final user =
           await db.collection("users").where("email", isEqualTo: email).get();
+      if (oldPassword != null) {
+        String oldHashedPassword = user.docs[0].data()["password"];
+        if (!BCrypt.checkpw(oldPassword, oldHashedPassword)) return false;
+      }
       String hashedPw = BCrypt.hashpw(newPassword, BCrypt.gensalt());
       user.docs.first.reference.update({"password": hashedPw});
       return true;
