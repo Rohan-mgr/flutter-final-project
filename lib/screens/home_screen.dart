@@ -6,6 +6,7 @@ import 'package:flutter_final_project/screens/profile_screen.dart';
 import 'package:flutter_final_project/screens/questions_screen.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Home extends StatefulWidget {
   final List<String>? initialBreadCrumbs;
@@ -163,6 +164,7 @@ class _HomeState extends State<Home> {
                     OutlinedButton(
                       onPressed: () async {
                         await Storage.remove('user');
+                        await GoogleSignIn().signOut();
                         Navigator.popAndPushNamed(context, "/");
                       },
                       style: OutlinedButton.styleFrom(

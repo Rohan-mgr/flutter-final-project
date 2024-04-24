@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:external_path/external_path.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_final_project/helper/directory_path.dart';
 import 'package:flutter_final_project/helper/storage.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_final_project/types/Blogs.dart';
 import 'package:flutter_final_project/types/profile.dart';
 import 'package:flutter_final_project/types/user.dart';
 import 'package:bcrypt/bcrypt.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import "dart:io";
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
@@ -513,6 +515,83 @@ class FirebaseAuthService {
       print('User created successfully, ${doc.id}');
     } catch (e) {
       print(e);
+      throw e;
+    }
+  }
+
+  Future<MyUser?> signInWithGoogle() async {
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // Check if user cancelled the sign-in flow
+      if (googleUser == null) {
+        throw 'User cancelled Google sign in';
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      final loggedUserCredentials =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final user = <String, dynamic>{
+        'firstName':
+            loggedUserCredentials.additionalUserInfo?.profile?['given_name'],
+        'lastName':
+            loggedUserCredentials.additionalUserInfo?.profile?['family_name'],
+        'email': loggedUserCredentials.additionalUserInfo?.profile?['email'],
+        'isAdmin': false,
+        'profile': {
+          'downloadUrl':
+              "${loggedUserCredentials.additionalUserInfo?.profile?['picture']}",
+          'storageFullPath': ""
+        }
+      };
+
+      // Check if the email already exists
+      final emailExists = await db
+          .collection('users')
+          .where('email',
+              isEqualTo:
+                  loggedUserCredentials.additionalUserInfo?.profile?['email'])
+          .get();
+
+      if (!emailExists.docs.isNotEmpty) {
+        DocumentReference doc = await db.collection("users").add(user);
+        print('Google User created successfully, ${doc.id}');
+      }
+
+      final snapshot = await db
+          .collection("users")
+          .where('email',
+              isEqualTo:
+                  loggedUserCredentials.additionalUserInfo?.profile?['email'])
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        throw 'User not found';
+      }
+      final userData = snapshot.docs.first.data();
+
+      return MyUser(
+        id: snapshot.docs.first.id,
+        firstName: userData['firstName'],
+        lastName: userData['lastName'],
+        email: userData['email'],
+        isAdmin: userData['isAdmin'] ?? false,
+        profilePic: userData['profile']?['downloadUrl'] ?? "",
+      );
+    } catch (e) {
+      print("google login failed => $e");
       throw e;
     }
   }

@@ -17,6 +17,7 @@ class _LoginState extends State<Login> {
   bool _showPassword = false;
   String _errMsg = "";
   bool _isSubmitting = false;
+  bool _isGoogleSubmitting = false;
 
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuthService _authService = FirebaseAuthService();
@@ -61,6 +62,29 @@ class _LoginState extends State<Login> {
         passwordController.clear();
         return null;
       }
+    }
+  }
+
+  void handleGoogleSignIn() async {
+    try {
+      setState(() {
+        _isGoogleSubmitting = true;
+      });
+      MyUser? user = await FirebaseAuthService().signInWithGoogle();
+      await Storage.setUser("user", user!);
+      Navigator.popAndPushNamed(context, "/home");
+
+      setState(() {
+        _isGoogleSubmitting = false;
+      });
+    } catch (error) {
+      print(error);
+      setState(() {
+        _isGoogleSubmitting = false;
+      });
+      Toastify(
+          context: context, msg: error.toString(), status: ToastStatus.error);
+      return null;
     }
   }
 
@@ -161,6 +185,54 @@ class _LoginState extends State<Login> {
                 child: _isSubmitting ? Loader() : Text('Sign In'),
               ),
               const SizedBox(height: 10.0),
+              Row(children: [
+                Expanded(
+                  child: Divider(
+                    color: Color.fromARGB(255, 204, 197, 197),
+                  ),
+                ),
+                const SizedBox(width: 10.0),
+                Text(
+                  "OR",
+                  style: TextStyle(color: Color.fromARGB(255, 109, 104, 104)),
+                ),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: Divider(
+                    color: Color.fromARGB(255, 204, 197, 197),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 10.0),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.deepPurple,
+                  minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  side: BorderSide(
+                    color: Colors.deepPurple,
+                    width: 2,
+                  ),
+                ),
+                onPressed: handleGoogleSignIn,
+                child: _isGoogleSubmitting
+                    ? Loader(size: 25, color: Colors.deepPurple)
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/google-icon.png',
+                            height: 30.0,
+                            width: 30.0,
+                          ),
+                          SizedBox(width: 10.0),
+                          Text('Sign In with Google'),
+                        ],
+                      ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

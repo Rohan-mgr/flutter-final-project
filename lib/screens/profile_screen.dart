@@ -11,6 +11,7 @@ import 'package:flutter_final_project/widgets/changePasswordModal.dart';
 import 'package:flutter_final_project/widgets/editNameModal.dart';
 import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:flutter_final_project/widgets/popUpMenu.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -232,6 +233,7 @@ class _ProfileState extends State<Profile> {
                               child: OutlinedButton(
                                 onPressed: () async {
                                   await Storage.remove('user');
+                                  await GoogleSignIn().signOut();
                                   Navigator.popAndPushNamed(context, "/");
                                 },
                                 style: OutlinedButton.styleFrom(
