@@ -24,16 +24,11 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       blog = widget.blogDetail;
     });
-    print("lado init");
-    print(blog);
-    print("email =  ${blog["user"]}");
     getAuthorName(email: blog["user"]);
     //set likes
-    print("author and profile " + " " + author + " " + profileImgUrl);
     setState(() {
       likes = blog["likes"];
     });
-    print(blog);
     setState(() {
       date = trimDate();
       blog["date"] = date;
@@ -45,14 +40,12 @@ class _BlogCardState extends State<BlogCard> {
   void getAuthorName({required String email}) async {
     final authorNameAndProfile =
         await FirebaseAuthService().getCorrespondingNameAndAuthor(email: email);
-    print(authorNameAndProfile);
     setState(() {
       author = authorNameAndProfile["author"];
       profileImgUrl = authorNameAndProfile["profileImgUrl"];
       blog["author"] = author;
       blog["profileImgUrl"] = profileImgUrl;
     });
-    print("profileImgUrl = " + profileImgUrl);
   }
 
   void checkIfLiked() async {
@@ -60,9 +53,6 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       isLiked = blog["likedBy"]?.contains(loggedInUser!.email) ? true : false;
     });
-    print(blog["likedBy"]);
-    print("email =" + loggedInUser.email);
-    print(isLiked);
   }
 
   void handleLike() async {
@@ -82,7 +72,6 @@ class _BlogCardState extends State<BlogCard> {
     setState(() {
       loggedInUser = user;
     });
-    print("ladouser" + loggedInUser);
   }
 
   String trimDate() {
