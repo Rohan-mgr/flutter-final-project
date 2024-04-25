@@ -165,7 +165,7 @@ class _HomeState extends State<Home> {
                       onPressed: () async {
                         await Storage.remove('user');
                         await GoogleSignIn().signOut();
-                        Navigator.popAndPushNamed(context, "/");
+                        Navigator.popAndPushNamed(context, "/login");
                       },
                       style: OutlinedButton.styleFrom(
                         shape: CircleBorder(),

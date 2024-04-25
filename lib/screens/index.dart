@@ -16,7 +16,7 @@ Map<String, Widget Function(BuildContext)> get appRoutes => {
             initialBreadCrumbs: [],
             bottomNavigationIndex: 0,
           ),
-      '/': (context) => Login(),
+      '/login': (context) => Login(),
       "/signup": (context) => SignUp(),
       "/forgot-password": (context) => ForgotPassword(),
 
