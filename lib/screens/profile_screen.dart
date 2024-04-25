@@ -234,7 +234,7 @@ class _ProfileState extends State<Profile> {
                                 onPressed: () async {
                                   await Storage.remove('user');
                                   await GoogleSignIn().signOut();
-                                  Navigator.popAndPushNamed(context, "/");
+                                  Navigator.popAndPushNamed(context, "/login");
                                 },
                                 style: OutlinedButton.styleFrom(
                                   shape: CircleBorder(),

@@ -48,7 +48,7 @@ class _NewPasswordState extends State<NewPassword> {
           context: context,
           msg: "Password Successfully Changed",
           status: ToastStatus.success);
-      Navigator.popAndPushNamed(context, "/");
+      Navigator.popAndPushNamed(context, "/login");
     }
   }
 
