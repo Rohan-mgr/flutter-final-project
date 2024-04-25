@@ -23,11 +23,18 @@ class _UploadBlogState extends State<UploadBlog> {
   String content = "";
   File? filePath = null;
   String? fileName = null;
-  bool isFileSelected = false;
+  bool? isFileSelected = null;
   bool isUploading = false;
 
   void handleSubmit() async {
     if (_formKey.currentState!.validate()) {
+      if (isFileSelected == null || isFileSelected == false) {
+        setState(() {
+          isFileSelected = false;
+        });
+        return;
+      }
+
       setState(() {
         title = titleController.text;
         content = contentController.text;
@@ -112,7 +119,7 @@ class _UploadBlogState extends State<UploadBlog> {
                     SizedBox(
                       height: 10,
                     ),
-                    isFileSelected
+                    isFileSelected == null || isFileSelected == true
                         ? Text("")
                         : Alert(context, "Please select a thumbnail",
                             ToastStatus.error),
@@ -125,7 +132,7 @@ class _UploadBlogState extends State<UploadBlog> {
                         SizedBox(
                           width: 20,
                         ),
-                        isFileSelected
+                        isFileSelected != null && isFileSelected == true
                             ? Expanded(
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
