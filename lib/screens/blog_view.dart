@@ -29,8 +29,6 @@ class _BlogViewState extends State<BlogView> {
   Widget build(BuildContext context) {
     final data = ModalRoute.of(context)!.settings.arguments as Map;
 
-    print("my data");
-    print(data);
     return Scaffold(
       appBar: AppBar(),
       body: Stack(

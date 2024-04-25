@@ -328,8 +328,6 @@ class FirebaseAuthService {
         await db.collection("users").where("email", isEqualTo: email).get();
 
     final result = user.docs[0].data();
-    print("lado bhitra");
-    print(result["profile"]["downloadUrl"]);
 
     return {
       "profileImgUrl": result["profile"]["downloadUrl"],
@@ -341,9 +339,17 @@ class FirebaseAuthService {
   Future<List<Map>> getBlogs() async {
     try {
       final querySnapshot = await db.collection("blogs").get();
-      return querySnapshot.docs
+      List<Map> data = querySnapshot.docs
           .map((doc) => {'id': doc.reference.id, ...doc.data()})
           .toList();
+
+      data.sort(
+        (a, b) {
+          return b["createdOn"].toDate().compareTo(a["createdOn"].toDate());
+        },
+      );
+
+      return data;
     } catch (error) {
       print(error);
       return [];
@@ -369,7 +375,6 @@ class FirebaseAuthService {
 
   Future<List<dynamic>> listFoldersAndFiles(String folderPath) async {
     try {
-      print('folder path => $folderPath');
       final storageRef = storage.ref().child(folderPath);
       final listResult = await storageRef.listAll();
 

@@ -145,7 +145,6 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                 if (value!.isEmpty) {
                   return 'Please re-enter your new password';
                 }
-                print("value = " + value);
 
                 if (value != newPassword)
                   return "Confirm password doesn't match";
