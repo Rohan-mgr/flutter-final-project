@@ -139,7 +139,7 @@ class _BlogCardState extends State<BlogCard> {
         margin: EdgeInsets.all(10),
         // color: Colors.grey,
         child: Container(
-          height: 250,
+          height: 260,
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Column(
             children: [
@@ -195,7 +195,7 @@ class _BlogCardState extends State<BlogCard> {
                     Expanded(
                       child: Container(
                         padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-                        height: 150,
+                        height: 160,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -212,7 +212,7 @@ class _BlogCardState extends State<BlogCard> {
                               children: [
                                 Text(
                                   blog["content"],
-                                  maxLines: 5,
+                                  maxLines: 6,
                                   overflow: TextOverflow.ellipsis,
                                 )
                               ],

@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_final_project/helper/helper.dart';
 import 'package:flutter_final_project/screens/home_screen.dart';
+import 'package:flutter_final_project/widgets/loader.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:flutter_final_project/services/firebase_auth_service.dart';
 
@@ -22,13 +23,22 @@ class _UploadBlogState extends State<UploadBlog> {
   String content = "";
   File? filePath = null;
   String? fileName = null;
-  bool isFileSelected = false;
+  bool? isFileSelected = null;
+  bool isUploading = false;
 
   void handleSubmit() async {
     if (_formKey.currentState!.validate()) {
+      if (isFileSelected == null || isFileSelected == false) {
+        setState(() {
+          isFileSelected = false;
+        });
+        return;
+      }
+
       setState(() {
         title = titleController.text;
         content = contentController.text;
+        isUploading = true;
       });
 
       try {
@@ -37,7 +47,9 @@ class _UploadBlogState extends State<UploadBlog> {
             title: title,
             content: content,
             fileName: fileName!);
-
+        setState(() {
+          isUploading = false;
+        });
         Navigator.pop(context);
         Navigator.pushAndRemoveUntil(
           context,
@@ -51,6 +63,9 @@ class _UploadBlogState extends State<UploadBlog> {
         );
       } catch (err) {
         print(err);
+        setState(() {
+          isUploading = false;
+        });
       }
     }
   }
@@ -104,6 +119,10 @@ class _UploadBlogState extends State<UploadBlog> {
                     SizedBox(
                       height: 10,
                     ),
+                    isFileSelected == null || isFileSelected == true
+                        ? Text("")
+                        : Alert(context, "Please select a thumbnail",
+                            ToastStatus.error),
                     Row(
                       children: [
                         Text(
@@ -113,7 +132,7 @@ class _UploadBlogState extends State<UploadBlog> {
                         SizedBox(
                           width: 20,
                         ),
-                        isFileSelected
+                        isFileSelected != null && isFileSelected == true
                             ? Expanded(
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
@@ -197,11 +216,17 @@ class _UploadBlogState extends State<UploadBlog> {
                       height: 15,
                     ),
                     ElevatedButton(
-                      onPressed: handleSubmit,
-                      child: Text(
-                        "UPLOAD",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
+                      onPressed: isUploading ? () {} : handleSubmit,
+                      child: isUploading
+                          ? Loader(
+                              size: 25,
+                              color: Colors.white,
+                            )
+                          : Text(
+                              "UPLOAD",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
                       style: ButtonStyle(
                           shape: MaterialStatePropertyAll(
                               RoundedRectangleBorder(
