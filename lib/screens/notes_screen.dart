@@ -348,18 +348,20 @@ class _NotesState extends State<Notes> {
                   SizedBox(width: 10),
                 ],
               ),
-            _isLoading
-                ? Positioned(
-                    top: 50,
-                    child: Center(
-                      child: Loader(
-                        size: 35,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-                  )
-                : Expanded(
-                    child: folders.length != 0
+            Expanded(
+              child: SingleChildScrollView(
+                child: _isLoading
+                    ? Container(
+                        height: 400, // Set height to screen height
+                        alignment: Alignment.center,
+                        child: Center(
+                          child: Loader(
+                            size: 35,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                      )
+                    : folders.length != 0
                         ? ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
                               dynamic item = folders[index];
@@ -525,7 +527,8 @@ class _NotesState extends State<Notes> {
                               Text("There is no files here yet"),
                             ],
                           ),
-                  ),
+              ),
+            ),
           ],
         ),
       ),
