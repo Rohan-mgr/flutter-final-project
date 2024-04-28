@@ -212,7 +212,7 @@ class _BlogCardState extends State<BlogCard> {
                               children: [
                                 Text(
                                   blog["content"],
-                                  maxLines: 6,
+                                  maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
                                 )
                               ],

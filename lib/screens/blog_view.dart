@@ -33,7 +33,7 @@ class _BlogViewState extends State<BlogView> {
       appBar: AppBar(),
       body: Stack(
         children: [
-          Column(
+          ListView(
             children: [
               Row(
                 children: [
@@ -52,14 +52,14 @@ class _BlogViewState extends State<BlogView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(right: 100, top: 10),
+                      padding: EdgeInsets.only(right: 10, top: 10),
                       child: Wrap(
                         children: [
                           Expanded(
                             child: Container(
                               padding: EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 20),
-                              width: 350,
+                              width: 500,
                               child: Text(
                                 data["title"],
                                 style: TextStyle(
@@ -119,33 +119,31 @@ class _BlogViewState extends State<BlogView> {
               Expanded(
                 child: Container(
                   padding: EdgeInsets.all(10),
-                  child: ListView(children: [
-                    Wrap(
-                      children: [
-                        Text(
-                          data["content"],
-                          style: TextStyle(fontSize: 15),
-                        )
-                      ],
-                    ),
-                  ]),
+                  child: Wrap(
+                    children: [
+                      Text(
+                        data["content"],
+                        style: TextStyle(fontSize: 15),
+                      )
+                    ],
+                  ),
                 ),
               )
             ],
           ),
-          Positioned(
-              top: 280,
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(50),
-                      topRight: Radius.circular(50)),
-                  color: Colors.white,
-                ),
-                height: 30,
-              ))
+          // Positioned(
+          //     top: 280,
+          //     left: 0,
+          //     right: 0,
+          //     child: Container(
+          //       decoration: BoxDecoration(
+          //         borderRadius: BorderRadius.only(
+          //             topLeft: Radius.circular(50),
+          //             topRight: Radius.circular(50)),
+          //         color: Colors.red,
+          //       ),
+          //       height: 30,
+          //     ))
         ],
       ),
     );
