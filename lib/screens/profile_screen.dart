@@ -207,6 +207,61 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  void handleRemoveBtnClick() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Are you sure you want to remove this file?',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          handleSelectedItem();
+                        },
+                        child: Text(
+                          'Remove',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -559,7 +614,7 @@ class _ProfileState extends State<Profile> {
                                   side:
                                       BorderSide(color: Colors.red, width: 0.0),
                                 ),
-                                onPressed: handleSelectedItem,
+                                onPressed: handleRemoveBtnClick,
                                 child: Row(
                                   children: [
                                     Icon(
